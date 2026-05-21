@@ -18,7 +18,7 @@ client = OpenAI(
 )
 
 
-def translate(text: str) -> str:
+def translate(text: str, target_language: str = "日文") -> str:
     if not text.strip():
         """把中文翻译成日文"""
         return "[跳过] 空文本"           # 如果去掉空格后是空字符串
@@ -27,7 +27,7 @@ def translate(text: str) -> str:
         response = client.chat.completions.create(
             model="deepseek-chat",
             messages=[
-                {"role": "system", "content": "你是一个翻译助手，把中文翻译成日文。"},
+                {"role": "system", "content": f"你是一个翻译助手，把中文翻译成{target_language}, **只输出翻译结果，不要添加任何解释、语气词或额外内容**。"},
                 {"role": "user", "content": text},
             ],
         )
