@@ -75,6 +75,53 @@
 | Practical AI | Spotify/Apple | 开发者视角，偏实用性 |
 | 硅谷101 | 小宇宙 | 中文，AI 行业趋势 + 人物故事 |
 
+## 信息获取效率工具
+
+> 信息源多了之后，一个个手动翻很耗时。用下面这些工具把"主动搜索"变成"被动接收"。
+
+### RSS 聚合（首选）
+
+用 **Feedly**（免费版，https://feedly.com）或 **Inoreader**（免费版）集中订阅以下 RSS 源。每天打开一个页面扫完所有更新，5-10 分钟。
+
+| RSS 源 | 链接 | 内容 |
+|--------|------|------|
+| Anthropic Engineering | https://www.anthropic.com/engineering/rss | Claude/Agent/MCP 工程实践 |
+| OpenAI Blog | https://openai.com/blog/rss | 模型更新、API 新功能 |
+| LangChain Blog | https://blog.langchain.dev/rss | Agent 架构演进、生产踩坑 |
+| Lilian Weng's Blog | https://lilianweng.github.io/index.xml | Agent/RAG 综述 |
+| Google AI Blog | https://blog.google/technology/ai/rss/ | Gemini、Google AI 进展 |
+| DeepSeek Blog | 暂无 RSS，手动关注官网/公众号 | 模型发布、技术报告 |
+
+### 优质 Newsletter（被动投喂）
+
+| 名称 | 订阅方式 | 频率 | 特点 |
+|------|---------|------|------|
+| TLDR AI | https://tldr.tech/ai | 每日 | 5 分钟速览当天 AI 新闻，信息密度高 |
+| The Batch (Andrew Ng) | https://www.deeplearning.ai/the-batch/ | 每周 | 行业趋势 + 技术解读 |
+| Anthropic Newsletter | https://www.anthropic.com/ | 不定期 | 产品更新、Claude Code 新功能 |
+
+### 微信/中文圈
+
+| 公众号 | 为什么值得看 |
+|--------|-------------|
+| Datawhale | 学习路线、项目实战、社区分享 |
+| 机器之心 | AI 新闻 + 论文解读 |
+| 量子位 | AI 行业动态 + 人物报道 |
+| 阿里技术 | 阿里 AI 实践、Qwen 生态、杭州方向 |
+| 夕小瑶科技说 | Agent/RAG 前沿 + 论文精读 |
+
+### GitHub Watch（只在有大更新时通知）
+
+给以下仓库点 Watch → Custom → Releases only，有新版本自动邮件通知：
+
+- `datawhalechina/Agent-Learning-Hub`
+- `langchain-ai/langgraph`
+- `crewAIInc/crewAI`
+- `langgenius/dify`
+- `infiniflow/ragflow`
+
+> 不要 Watch "All Activity"，消息会爆炸。只订阅 Releases。
+
 ## 待评估
 - PageIndex（VectifyAI）— 无向量 RAG 范式，等更多生产案例
 - rtk — Rust Agent 框架，Token 成本控制，观察生态发展
