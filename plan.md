@@ -1,9 +1,7 @@
 # AI 应用开发入职路线图
 
-> 本文件是学习路线图的 Git 仓库副本，与 Claude Code plan 文件同步。
-> Claude Code 本地文件: `.claude/plans/ai-ai-tranquil-quokka.md`
-> 
-> 此文件由每周定时任务自动更新。如需查看最新版本，请在 Claude Code 中说"当前 AI 行业有什么新变化？"
+> 本文件是学习路线图的主文档，由每周定时任务自动更新。
+> 如需查看最新版本，请在 Claude Code 中说"当前 AI 行业有什么新变化？"
 
 **目标岗位：** AI 应用开发工程师
 **目标地点：** 杭州（电商/AI 生态）

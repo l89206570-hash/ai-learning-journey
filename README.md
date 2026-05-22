@@ -5,36 +5,36 @@
 
 ## 关于我
 
-之前没有编程工作经验，决定转行 AI 应用开发。从零开始，全职学习，目标 4 个月内入行。
+零经验转行，全职学习，目标 4 个月内入行 AI 应用开发。学习过程中通过接单/卖模板产生收入。
 
-## 技术栈
+## 文件导航
 
-- **语言:** Python, JavaScript/TypeScript (学习中)
-- **AI:** LLM API, RAG, Agent, LangChain, LlamaIndex
-- **Web:** Streamlit, FastAPI
-- **工具:** Cursor, Claude Code
+| 文件 | 用途 |
+|------|------|
+| `plan.md` | 4 个月入职路线图（技术栈、阶段性目标、信息摄入习惯） |
+| `progress.md` | 每日/每周进度、产出记录、收入与面试追踪 |
+| `knowledge.md` | 知识点存档 + 踩坑记录（每天更新） |
+| `resources.md` | 学习资源库（项目、文档、博客、视频、播客） |
+| `advanced-plan.md` | 进阶双线计划（通用进阶 + 电商/接单/求职定制） |
 
 ## 项目
 
-| 周 | 项目 | 技术 | 链接 |
+| 周 | 项目 | 技术 | 目录 |
 |----|------|------|------|
-| W1 | 批量翻译工具 | Python, LLM API | — |
-| W2 | 多模型对比器 | Streamlit, API | — |
-| W4 | 跟文档对话 | RAG, ChromaDB | — |
-| W8 | 跨境 AI 客服 | LangGraph, FastAPI | — |
+| W1 | 批量翻译 + Web 界面 + 邮件润色 | Python, LLM API, Streamlit | `projects/w1-translator/` |
+| W2 | 多模型对比器 | Streamlit, DeepSeek API | `projects/w2-model-battle/` |
 
-## 学习日志
+## 技术栈
 
-- [进度追踪](./progress.md)
-- [学习资源库](./resources.md)
-- [学习路线图](./plan.md)
-
-## 收入记录
-
-学习过程中的接单/模板收入（目标：第二个月开始有收入）
+- **语言:** Python
+- **LLM:** DeepSeek V4, Qwen, Claude/OpenAI API
+- **框架:** LangChain, LlamaIndex, LangGraph, CrewAI
+- **Web:** Streamlit → FastAPI
+- **向量库:** ChromaDB → Milvus
+- **可观测性:** LangSmith / LangFuse
+- **协议:** MCP
+- **工具:** Cursor, Claude Code
 
 ## 联系我
 
-- GitHub: [@你的用户名]
-- 小红书: [待注册]
-- 即刻: [待注册]
+- GitHub: [@l89206570-hash](https://github.com/l89206570-hash)
