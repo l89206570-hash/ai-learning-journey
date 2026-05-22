@@ -46,6 +46,8 @@
 |------|------|------|
 | `for ... in` | 遍历列表每个元素 | W1D1 |
 | `enumerate(seq, start)` | 同时拿到索引和值，`start` 设置起始序号 | W1D1 |
+| `reversed(seq)` | 倒序遍历列表，返回迭代器，不额外占内存 | W2D1 |
+| `list[::-1]` | 列表切片倒序，返回新拷贝的列表，会多占一份内存 | W2D1 |
 | `continue` | 跳过本轮循环，进入下一轮 | W1D2 |
 | `if/elif/else` | 多条件分支判断 | W1D1 |
 
@@ -143,6 +145,33 @@
 | 脚本重跑 | 每次用户交互，整个脚本从头到尾重新执行一次 | W1D3 |
 | 组件 key | 相同组件需要唯一 `key` 参数区分，否则报 `DuplicateElementId` | W1D3 |
 | 变量不持久 | 普通变量每次重跑重置，要持久化用 `st.session_state` | W1D3 |
+| `st.rerun()` | 手动触发页面重跑，配合 session_state 使用：按钮里存数据 → rerun → 展示区读数据渲染 | W2D1 |
+| session_state 分离 | 展示用完整数据（last_battle），历史存截断版（battle_history），各司其职省内存 | W2D1 |
+
+### 新增组件
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| `st.checkbox()` | 勾选框，返回 `True/False`，`value=True` 设置默认勾选，`help=` 鼠标悬停提示 | W2D1 |
+
+---
+## Python 进阶
+
+### 时间与性能
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| `time.time()` | 返回当前 Unix 时间戳（秒浮点数），调用前后各取一次相减 = 耗时 | W2D1 |
+| API 性能关注 | response.usage 可拿到 `prompt_tokens`、`completion_tokens`、`total_tokens` | W2D1 |
+
+### 字典技巧
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| `.get(key, default)` | 安全从字典取值，key 不存在返回 default 而不是报 KeyError | W2D1 |
+| `getattr(obj, attr, default)` | 安全从对象取属性，属性不存在返回 default 而不是报 AttributeError | W2D1 |
+| 字典做配置 | `MODELS = {"key": {...}}` 管理模式，新增模型只加配置不改逻辑代码 | W2D1 |
+| 字典推导式 | `{k: 处理(v) for k, v in dict.items()}` 一行完成过滤/转换 | W2D1 |
 
 ---
 
@@ -158,3 +187,9 @@
 | `readlines()` 带 `\n` | 每行末尾自带换行符 | 用 `.rstrip("\n")` 去掉 | W1D2 |
 | `StreamlitDuplicateElementId` | 同页面多个相同组件没有唯一 key | 给每个组件加唯一的 `key` 参数 | W1D3 |
 | `columns` 内容跑出布局 | `with col2:` 内的代码缩进错误，变成在并排区域外面 | 检查缩进确保在 `with col:` 块内 | W1D3 |
+| f-string 嵌套双引号 | `f"等待{config["name"]}"` 中双引号套双引号导致 SyntaxError | 内层用单引号：`f"等待{config['name']}"` | W2D1 |
+| 变量先于定义使用 | `choice = response.choices[0]` 写在 `response = ...create()` 前面 | 先创建 response 再从中取值，顺序不能反 | W2D1 |
+| 展示区缩进在按钮内 | 结果展示写在 `if st.button()` 里面，`st.rerun()` 后永远不执行 | 展示区顶到左边和按钮 `if` 平级 | W2D1 |
+| Chat 模型耗时异常 | deepseek-chat 有时 36 秒，正常应该是 3-5 秒 | 服务端排队/网络波动，不代表模型本身速度 | W2D1 |
+| Reasoner 引入不必要的库 | V3 为矩阵运算引入了 numpy，斐波那契完全不需要 | 代码评审关注：是否引入了不必要的依赖 | W2D1 |
+| `st.rerun()` 放在按钮外导致无限刷新 | sidebar 历史展示区里放了 st.rerun()，每次渲染都触发重跑 | st.rerun() 必须放在按钮的 else 分支里，不在展示区 | W2D1 |

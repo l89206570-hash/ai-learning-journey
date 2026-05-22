@@ -3,9 +3,9 @@
 ## 当前状态
 - **当前周：** W2（W1 已完成）
 - **开始日期：** 2026-05-21
-- **今日日期：** 2026-05-21
+- **今日日期：** 2026-05-22
 - **今日工作时长：** 4h
-- **累计工作时长：** 6h
+- **累计工作时长：** 10h
 - **状态：** 🟢 正常推进
 
 ## 本周进度（W1 — Python 速成）
@@ -14,14 +14,17 @@
 - ✅ Day 3 完成：Streamlit 入门 — 侧边栏、多标签页、文件上传、翻译历史、多语言翻译
 - ✅ Day 4 完成：独立练习 — 用 API 从零写 Streamlit 工具（邮件润色 + 润色历史）
 
+## W2 进度（W2 — 多模型与 API 进阶）
+- ✅ Day 1 完成：多模型对比器 — 字典配置管理、time.time() 计时、response.usage Token 追踪、getattr 安全取值、st.checkbox、st.rerun() + session_state 分离模式、sidebar 对比历史（reversed/[::-1] 倒序）、模型差异分析（Chat vs Reasoner 设计目标）
+
 ## 遇到的困难
-- Python 缩进规则需要适应（IndentationError 一次后修复）
-- try/except 的空格对齐容易搞混（已理解）
-- Streamlit 按钮 key 冲突导致 StreamlitDuplicateElementId（已解决：给每个按钮唯一 key）
-- DataFrame 索引和 columns 参数搞混（已理解）
+- f-string 嵌套双引号导致 SyntaxError（已解决：内层改用单引号）
+- 变量使用在赋值之前（已理解：代码执行顺序）
+- 展示区错误嵌套在按钮内（已理解：st.rerun() 后展示区必须在按钮外部）
+- deepseek-chat 偶尔响应 36 秒（已理解：服务端排队，非模型本身问题）
 
 ## 明日计划
-- W2 Day 1：多模型对比器 — 用 Streamlit 整合多个 LLM API，做模型对比工具
+- W2 Day 2：接入 Qwen API — 注册阿里云百炼账号，集齐 3 个模型对比（DeepSeek Chat / DeepSeek Reasoner / Qwen）
 
 ## 已完成的产出
 | 周 | 产出 | 链接 |
@@ -29,6 +32,7 @@
 | W1 | translator.py（API 调用 + 批量翻译） | projects/w1-translator/translator.py |
 | W1 | app.py（Streamlit Web 界面 — 单条/批量翻译、多语言、历史记录） | projects/w1-translator/app.py |
 | W1 | polish_app.py（邮件润色工具 — 独立练习） | projects/w1-translator/polish_app.py |
+| W2 | battle.py（多模型对比器 — 独立从零编写） | projects/w2-model-battle/battle.py |
 
 ## 收入记录
 | 日期 | 来源 | 金额 |

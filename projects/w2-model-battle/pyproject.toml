@@ -1,0 +1,10 @@
+[project]
+name = "w2-model-battle"
+version = "0.1.0"
+description = "W2 Day 1 — 多模型对比器"
+requires-python = ">=3.12"
+dependencies = [
+    "openai>=2.37.0",
+    "python-dotenv>=1.2.2",
+    "streamlit>=1.57.0",
+]
