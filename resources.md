@@ -122,7 +122,38 @@
 
 > 不要 Watch "All Activity"，消息会爆炸。只订阅 Releases。
 
-## 待评估
+## 游戏开发（兴趣线，业余）
+
+> 入职后启动，当前只收集资源不下场学。
+
+### 引擎
+| 资源 | 链接 | 说明 |
+|------|------|------|
+| Godot Engine | https://godotengine.org/ | 免费开源，GDScript 类似 Python |
+| GDQuest | https://www.gdquest.com/ | 最佳 Godot 入门教程 |
+| Brackeys Godot | YouTube 搜 "Brackeys Godot" | 2025 年新出，质量高 |
+
+### AI + 游戏交叉
+| 框架/工具 | 链接 | 用途 |
+|----------|------|------|
+| Godot LLM | GitHub 搜 "godot-llm" | Godot 内调用 LLM API |
+| LLM Unity | GitHub 搜 "LLMUnity" | Unity 内调用 LLM，参考架构 |
+| Yarn Spinner | https://yarnspinner.dev/ | 对话系统（用来看架构设计） |
+
+### 游戏设计参考
+| 资源 | 说明 |
+|------|------|
+| GMTK (Game Maker's Toolkit) | 游戏设计分析 YouTube 频道 |
+| GDC Vault | 游戏开发者大会免费演讲 |
+| 《体验引擎》 | 游戏手感设计原理 |
+| 《游戏设计艺术》 | 经典入门书 |
+
+### 独立游戏标杆（研究案例）
+| 游戏 | 开发人数 | 学习点 |
+|------|---------|--------|
+| 《星露谷物语》| 1 人 | 一人全栈能做到什么程度 |
+| 《Celeste》| 2 人 | 2D 手感标杆 |
+| 《吸血鬼幸存者》| 1 人 | 玩法驱动，最小美术投入 |
 - PageIndex（VectifyAI）— 无向量 RAG 范式，等更多生产案例
 - rtk — Rust Agent 框架，Token 成本控制，观察生态发展
 - InsForge — Agent 后端一体化平台，观察成熟度
