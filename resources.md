@@ -4,11 +4,11 @@ tags:
   - ai-learning
   - reference
 created: 2026-05-22
-updated: 2026-05-25
+updated: 2026-05-26
 ---
 
 # AI 学习资源库
-> 自动维护，每周更新 | 最后更新: 2026-05-22
+> 自动维护，每周更新 | 最后更新: 2026-05-26
 
 ## 当前推荐学习（按优先级排序）
 1. [Agent Learning Hub](https://github.com/datawhalechina/Agent-Learning-Hub) — Datawhale 系统性 AI Agent 路线图 + 11 级项目阶梯，适合 W4-W10
@@ -26,11 +26,15 @@ updated: 2026-05-25
 | RAG_DeepDive_HandsOn | — | RAG 从入门到 Agentic 的完整实操 | W4 | 2026-05-20 |
 | RAGFlow | 40K+ | 生产级 RAG 架构参考，企业级设计 | W4-W7 | 2026-05-20 |
 | awesome-ai-agents-2026 | — | 2026 Agent 生态全景，选型必看 | W6 | 2026-05-20 |
-| Dify | 60K+ | LLM 应用产品化最佳参考 | W8 | 2026-05-20 |
+| Dify | 132K+ | LLM 应用产品化最佳参考，2026 年增长迅猛 | W8 | 2026-05-20 |
 | CrewAI | 44K+ | 最快上手多 Agent 协作 | W10 | 2026-05-20 |
 | Agent Learning Hub | — | Datawhale 系统性 AI Agent 学习路线图 + 11 级项目阶梯 | W4-W10 | 2026-05-22 |
 | LangGraph | 10K+ | 复杂状态ful Agent 工作流 | W6-W10 | 2026-05-20 |
 | LlamaIndex | 46K+ | 文档级 RAG 最强框架 | W4-W7 | 2026-05-20 |
+| OpenClaw | 302K+ | 多平台 AI Agent 网关，177+ 生产配置模板，架构设计参考 | W6-W10 | 2026-05-26 |
+| Gemini CLI | 97K+ | Google 官方开源终端 Agent，原生 MCP 支持，1M Token 上下文 | W6 | 2026-05-26 |
+| DeerFlow | 25K+ | 字节跳动开源，Planning+Tools+Memory+Execution 深度研究 Agent | W6-W10 | 2026-05-26 |
+| n8n | 179K+ | 可视化工作流自动化，原生 AI Agent 节点，400+ 集成 | W8 | 2026-05-26 |
 
 ## 教程 & 文章
 | 标题 | 链接 | 主题 | 适合阶段 | 收录日期 |
@@ -166,6 +170,9 @@ updated: 2026-05-25
 - PageIndex（VectifyAI）— 无向量 RAG 范式，等更多生产案例
 - rtk — Rust Agent 框架，Token 成本控制，观察生态发展
 - InsForge — Agent 后端一体化平台，观察成熟度
+- Agentic RAG（CRAG/自适应检索）— RAG + Agent 推理循环融合，2026 年主流方向，W7 后深入
+- Aluminium OS（Google）— Android + Chrome OS 统一平台，影响 SaaS/工具类产品形态
+- GPT-5.5 Action Layer — Computer Use 原语操作第三方 UI，Agent 自动化边界扩展
 
 ## 已过时/不推荐
 - （空）— 保留此区防止重复评估已淘汰技术
