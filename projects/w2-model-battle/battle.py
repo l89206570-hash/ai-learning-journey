@@ -6,23 +6,56 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 load_dotenv()
-client = OpenAI(
-    api_key=os.getenv("DEEPSEEK_API_KEY"),
-    base_url="https://api.deepseek.com",
-)
+client = {
+    "deepseek": OpenAI(
+        api_key=os.getenv("DEEPSEEK_API_KEY"),
+        base_url="https://api.deepseek.com",
+    ),
+    "qwen": OpenAI(
+        api_key=os.getenv("QWEN_API_KEY"),
+        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+    ),
+    "mimo": OpenAI(
+        api_key=os.getenv("MIMO_API_KEY"),
+        base_url="https://token-plan-cn.xiaomimimo.com/v1",
+    )
+}
 
 MODELS = {
-    "deepseek-chat": {
-        "name": "DeepSeek Chat (V3)",
-        "model": "deepseek-chat",
-        "description": "通用对话，快速直接",
-        "icon": "💬",
+    "deepseek-v4-flash": {
+        "name": "DS V4 Flash",
+        "model": "deepseek-v4-flash",
+        "description": "V4 轻量版，快速省钱（原 deepseek-chat）",
+        "icon": "⚡",
+        "provider": "deepseek",
     },
-    "deepseek-reasoner": {
-        "name": "deepseek-reasoner",
-        "model": "deepseek-reasoner",
-        "description": "复杂推理，详细解释",
+    "deepseek-v4-flash-reasoning": {
+        "name": "DS V4 Flash (思考)",
+        "model": "deepseek-v4-flash",
+        "description": "V4 思考模式，复杂推理（原 deepseek-reasoner）",
+        "icon": "⚡🧠",
+        "provider": "deepseek",
+    },
+    "deepseek-v4-pro": {
+        "name": "DS V4 Pro",
+        "model": "deepseek-v4-pro",
+        "description": "V4 旗舰版，强推理+好中文",
+        "icon": "🔥",
+        "provider": "deepseek",
+    },
+    "qwen": {
+        "name": "Qwen",
+        "model": "qwen-plus",
+        "description": "通义千问，全能助手",
+        "icon": "�",
+        "provider": "qwen",
+    },
+    "mimo": {
+        "name": "mimo",
+        "model": "mimo-v2.5-pro",
+        "description": "多模态推理，详细解释",
         "icon": "🧠",
+        "provider": "mimo",
     },
 }
 
@@ -30,7 +63,7 @@ MODELS = {
 def call_model(model_config: dict, prompt: str, system_prompt: str = "") -> dict:
     try:
         start = time.time()
-        response = client.chat.completions.create(
+        response = client[model_config["provider"]].chat.completions.create(
             model=model_config["model"],
             messages=[
                 {"role": "system", "content": system_prompt},

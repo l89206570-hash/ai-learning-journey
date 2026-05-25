@@ -1,10 +1,22 @@
- # 知识点存档
+---
+tags:
+  - knowledge
+  - ai-learning
+  - python
+  - llm
+  - rag
+  - streamlit
+created: 2026-05-21
+updated: 2026-05-25
+---
 
-> 每天学到的概念、语法、踩坑记录。配合 `progress.md` 使用。
+# 知识点存档
+
+> 每天学到的概念、语法、踩坑记录。配合 [[progress]] 使用。
 
 ---
 
-## Python 基础
+## [[Python 基础]]
 
 ### 函数
 
@@ -68,7 +80,7 @@
 
 ---
 
-## API 调用
+## [[API 调用]]
 
 | 概念 | 要点 | 来源 |
 |------|------|------|
@@ -77,9 +89,65 @@
 | system prompt | 设定 AI 的角色和行为 | W1D1 |
 | `.env` 管理密钥 | `load_dotenv()` + `os.getenv()` 读取 API Key，不写死在代码里 | W1D1 |
 
+### 多端点多客户端
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| 多客户端架构 | 不同模型走不同 API 端点，一个端点一个 `OpenAI()` 客户端实例 | W2D3 |
+| provider 路由模式 | MODELS 字典每项加 `"provider"` 字段，`_clients[config["provider"]]` 查对应 client | W2D3 |
+| 客户端缓存 | 用一个 `_clients = {}` 字典存所有 client，按 provider 名索引复用 | W2D3 |
+| DashScope 兼容端点 | 千问走 `https://dashscope.aliyuncs.com/compatible-mode/v1`，模型名 `qwen-plus` | W2D3 |
+| MiMo Token Plan 端点 | `tp-` 开头 Key 走 `https://token-plan-cn.xiaomimimo.com/v1`，无需本地代理 | W2D3 |
+
 ---
 
-## Streamlit
+## [[模型选型与性能]]
+
+> 基于 W2D3 4 模型实测数据（数学推理 / 代码 / 翻译三组对比）
+
+| 模型 | 速度 | Token 效率 | 适用场景 |
+|------|------|-----------|---------|
+| DeepSeek Chat (V3) | ⭐⭐⭐ 最快 | ⭐⭐⭐ 最省 | 日常对话、翻译、代码、性价比首选 |
+| DeepSeek Reasoner | ⭐⭐⭐ 快 | ⭐⭐ 中 | 数学推理、复杂逻辑，比 Chat 更简洁 |
+| Qwen (千问) | ⭐ 慢 | ⭐ 费 | 输出丰富详细，适合需要多版本答案的场景 |
+| MiMo-V2.5-Pro | ⭐⭐ 中 | ⭐⭐ 中 | Token Plan 免费期首选，输出结构清晰（表格/分节） |
+
+**核心原则：** 简单任务不要用大炮打蚊子 — 翻译/代码用 Chat 模型又快又省，推理/数学才上 Reasoner。
+
+### DS vs Qwen 行为差异（W2D4 深度对比）
+
+> 基于 6 条系统化 prompt（翻译/推理/代码/指令遵循），详见 `projects/w2-model-battle/model-comparison.md`
+
+| 维度 | DS Chat | Qwen | 面试金句 |
+|------|---------|------|---------|
+| 输出控制 | 问多少答多少 | 永远多给 3-5 倍内容 | "DS Chat 够用就好，Qwen 知无不言" |
+| 中文表达 | 偏书面体 | 更自然口语化 | "Qwen 中文更像真人说话" |
+| 推理风格 | 清单式，简洁 | 学术论文式，列公式 | "Qwen 把开放题当论文写" |
+| Token 效率 | 6 题 1384 tok | 6 题 4628 tok（3.3x） | "正确率相同，成本差 3 倍" |
+| 延迟 | 6 题 12.6s | 6 题 84.5s（6.7x） | "DS Chat 快一个数量级" |
+| 正确率 | 6/6 | 6/6 | "结果都对，但过程完全不同" |
+
+**选型结论：** 中文对话/创作首选 Qwen（母语级），逻辑推理和成本敏感场景选 DS Flash，代码场景两者无差异。
+
+### DeepSeek 模型名陷阱（W2D4 发现）
+
+| 发现 | 要点 | 来源 |
+|------|------|------|
+| `[[DeepSeek]]` 模型名陷阱 | `deepseek-chat` 已自动映射到 V4，2026.04.24 起生效 | W2D4 |
+| V4 两个版本 | V4-Flash（轻量快）vs V4-Pro（旗舰强推理），Flash 性价比高，Pro 不总是更好 | W2D4 |
+| 定期看 Changelog | 不看更新日志连自己调的什么模型都不知道——面试高频问题"你怎么跟踪模型变化" | W2D4 |
+
+### V4-Flash vs V4-Pro vs Qwen 补充对比（W2D4 第二轮）
+
+| 发现 | 要点 |
+|------|------|
+| Pro 在翻译上退步 | V4-Pro 用"backup nodes"而非"standby nodes"，耗时 5x 但术语反而不如 Flash |
+| Pro 中文创作有进步 | "西湖像在轻轻地呼气"比 Flash 的"温吞吞的橘色"更有文学感 |
+| Qwen 中文护城河 | 即使 V4-Pro 也追不上 Qwen 的母语级语感，"所以啊"、语气词、新意象碾压 |
+
+---
+
+## [[Streamlit]]
 
 ### 基础组件
 
@@ -155,7 +223,7 @@
 | `st.checkbox()` | 勾选框，返回 `True/False`，`value=True` 设置默认勾选，`help=` 鼠标悬停提示 | W2D1 |
 
 ---
-## Python 进阶
+## [[Python 进阶]]
 
 ### 时间与性能
 
@@ -175,21 +243,117 @@
 
 ---
 
-## 踩坑记录
+---
+## [[RAG]]（检索增强生成）
 
-| 问题 | 原因 | 解决 | 日期 |
-|------|------|------|------|
-| `IndentationError` | Python 用缩进划分代码块，冒号 `:` 后必须缩进 | 检查缩进级别，统一用 4 空格 | W1D1 |
-| try/except 对齐 | `try` 和 `except` 必须在同一缩进级别 | 确保对齐 | W1D1 |
-| `NameError: not defined` | 函数还没定义就调用了 | 定义写在调用之前 | W1D2 |
-| 函数调用自己 | 函数体内调用同名函数导致死循环 | 调用代码写在 `def` 外面 | W1D2 |
-| `with` 后面无内容 | `with ... :` 后下一行必须缩进且有代码 | 冒号后写逻辑，缩进 4 格 | W1D2 |
-| `readlines()` 带 `\n` | 每行末尾自带换行符 | 用 `.rstrip("\n")` 去掉 | W1D2 |
-| `StreamlitDuplicateElementId` | 同页面多个相同组件没有唯一 key | 给每个组件加唯一的 `key` 参数 | W1D3 |
-| `columns` 内容跑出布局 | `with col2:` 内的代码缩进错误，变成在并排区域外面 | 检查缩进确保在 `with col:` 块内 | W1D3 |
-| f-string 嵌套双引号 | `f"等待{config["name"]}"` 中双引号套双引号导致 SyntaxError | 内层用单引号：`f"等待{config['name']}"` | W2D1 |
-| 变量先于定义使用 | `choice = response.choices[0]` 写在 `response = ...create()` 前面 | 先创建 response 再从中取值，顺序不能反 | W2D1 |
-| 展示区缩进在按钮内 | 结果展示写在 `if st.button()` 里面，`st.rerun()` 后永远不执行 | 展示区顶到左边和按钮 `if` 平级 | W2D1 |
-| Chat 模型耗时异常 | deepseek-chat 有时 36 秒，正常应该是 3-5 秒 | 服务端排队/网络波动，不代表模型本身速度 | W2D1 |
-| Reasoner 引入不必要的库 | V3 为矩阵运算引入了 numpy，斐波那契完全不需要 | 代码评审关注：是否引入了不必要的依赖 | W2D1 |
-| `st.rerun()` 放在按钮外导致无限刷新 | sidebar 历史展示区里放了 st.rerun()，每次渲染都触发重跑 | st.rerun() 必须放在按钮的 else 分支里，不在展示区 | W2D1 |
+### 核心概念
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| `[[RAG]]` | Retrieval Augmented Generation，先检索再回答，给 LLM 限定信息来源避免幻觉 | W3D1 |
+| 为什么需要 RAG | LLM 训练数据有截止日期，不知道你的业务知识，容易编造答案（幻觉） | W3D1 |
+| RAG vs 直接 LLM | RAG = 开卷考试（有知识库），直接 LLM = 闭卷考试（靠训练数据猜） | W3D1 |
+
+### [[LlamaIndex]] 四大核心
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| `[[Document]]` | 把原始文本包装成 LlamaIndex 能理解的对象 | W3D1 |
+| `[[Node]]` | 把 Document 切成小块的文本片段，每块是一个检索单元 | W3D1 |
+| `[[Index]]` | 把 Node 向量化后存到索引里，方便语义检索 | W3D1 |
+| `[[QueryEngine]]` | 接收问题 → 检索相关 Node → 把原文+问题发给 LLM → 返回答案 | W3D1 |
+
+### [[embedding|嵌入模型]]（Embedding）
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| `[[embedding|嵌入模型]]` 的作用 | 把文字转成向量，用于计算"哪段文本和问题最相关" | W3D1 |
+| BAAI/bge-small-zh-v1.5 | 中文优化的轻量嵌入模型，本地运行不调 API | W3D1 |
+| ModelScope 下载 | `snapshot_download("模型名")` 从阿里云国内直连下载，替代 HuggingFace | W3D1 |
+| HF 镜像 | `os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"` 但不如 ModelScope 稳定 | W3D1 |
+
+### [[LlamaIndex]] 配置
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| `Settings.embed_model` | 全局设置嵌入模型，建索引时自动使用 | W3D1 |
+| `Settings.llm` | 全局设置 LLM，查询时自动使用 | W3D1 |
+| `OpenAILike` | LlamaIndex 通用 OpenAI 兼容接口，不校验模型名白名单 | W3D1 |
+| `api_base` vs `base_url` | OpenAILike 用 `api_base`，原版 OpenAI 用 `base_url` | W3D1 |
+| DeepSeek V4 beta 端点 | V4 需要 `api_base="https://api.deepseek.com/beta"`，V3 不需要 | W3D1 |
+
+### 分块策略（Chunking）
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| 为什么需要切分 | LLM 上下文窗口有限，小块检索更精准，且向量化是按块进行的 | W3D2 |
+| `SentenceSplitter` | LlamaIndex 默认切分器，按句子边界切，不会把一句话砍成两半 | W3D2 |
+| `chunk_size` | 每块最大字符数，越小→Node 越多→检索更精准但上下文更少 | W3D2 |
+| `chunk_overlap` | 相邻两块重叠的字符数，防止关键信息刚好落在两块的边界上被切断 | W3D2 |
+| 实际测试 | 533 字符文档：chunk_size=256→3 块，512→2 块，1024→1 块（不够切） | W3D2 |
+
+### 检索过程
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| `similarity_top_k` | 控制检索返回几个最相关的 Node，值越大信息越全但噪音越多 | W3D2 |
+| `source_nodes` | response 的属性，包含了本次检索到的 Node 列表 | W3D2 |
+| `source.score` | 相似度分数（0~1），越高越相关，但高分不一定等于精确匹配 | W3D2 |
+| 检索流程 | 用户问题→向量化→和索引中每个 Node 的向量比余弦相似度→取 top_k | W3D2 |
+
+### 索引持久化
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| 索引持久化 | `StorageContext` 管理存/读，`persist()` 序列化到硬盘，`load_index_from_storage()` 恢复，实测快 19x | W3D2 |
+| `index.storage_context.persist()` | 把建好的索引序列化存到硬盘，只需执行一次 | W3D2 |
+| `load_index_from_storage()` | 从硬盘恢复索引，不需要重新 embedding，实测快 19x | W3D2 |
+| build once, load many | 建一次索引（build_index.py），以后每次启动直接加载（query_index.py） | W3D2 |
+
+### Prompt 模板
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| prompt 在 RAG 里的角色 | 不是手写完整 messages，而是设计"填空题"——`{context_str}` 和 `{query_str}` 是占位符 | W3D2 |
+| `{context_str}` | 占位符，LlamaIndex 在查询时自动替换为检索到的文档片段 | W3D2 |
+| `{query_str}` | 占位符，自动替换为用户的问题 | W3D2 |
+| `PromptTemplate` | LlamaIndex 的自定义模板类，传一个字符串即可定制 prompt 格式 | W3D2 |
+| `get_prompts()` | 查看当前 query engine 使用的默认模板，调试用 | W3D2 |
+| 自定义模板的意义 | 控制 LLM 行为边界——"资料没有就说不知道"防止幻觉，"不超过 3 句话"控制输出长度 | W3D2 |
+
+### 项目环境搭建
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| 虚拟环境 | `python -m venv .venv`，每个项目独立一套环境，互不干扰 | W3D1 |
+| 环境三要素 | `.venv/`（包）+ `.env`（密钥）+ 代码文件 | W3D1 |
+
+---
+
+## [[踩坑记录]]
+
+| 问题                            | 原因                                                            | 解决                                                               | 日期   |
+| ----------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------- | ---- |
+| `IndentationError`            | Python 用缩进划分代码块，冒号 `:` 后必须缩进                                  | 检查缩进级别，统一用 4 空格                                                  | W1D1 |
+| try/except 对齐                 | `try` 和 `except` 必须在同一缩进级别                                    | 确保对齐                                                             | W1D1 |
+| `NameError: not defined`      | 函数还没定义就调用了                                                    | 定义写在调用之前                                                         | W1D2 |
+| 函数调用自己                        | 函数体内调用同名函数导致死循环                                               | 调用代码写在 `def` 外面                                                  | W1D2 |
+| `with` 后面无内容                  | `with ... :` 后下一行必须缩进且有代码                                     | 冒号后写逻辑，缩进 4 格                                                    | W1D2 |
+| `readlines()` 带 `\n`          | 每行末尾自带换行符                                                     | 用 `.rstrip("\n")` 去掉                                             | W1D2 |
+| `StreamlitDuplicateElementId` | 同页面多个相同组件没有唯一 key                                             | 给每个组件加唯一的 `key` 参数                                               | W1D3 |
+| `columns` 内容跑出布局              | `with col2:` 内的代码缩进错误，变成在并排区域外面                               | 检查缩进确保在 `with col:` 块内                                           | W1D3 |
+| f-string 嵌套双引号                | `f"等待{config["name"]}"` 中双引号套双引号导致 SyntaxError                | 内层用单引号：`f"等待{config['name']}"`                                   | W2D1 |
+| 变量先于定义使用                      | `choice = response.choices[0]` 写在 `response = ...create()` 前面 | 先创建 response 再从中取值，顺序不能反                                         | W2D1 |
+| 展示区缩进在按钮内                     | 结果展示写在 `if st.button()` 里面，`st.rerun()` 后永远不执行                | 展示区顶到左边和按钮 `if` 平级                                               | W2D1 |
+| Chat 模型耗时异常                   | deepseek-chat 有时 36 秒，正常应该是 3-5 秒                             | 服务端排队/网络波动，不代表模型本身速度                                             | W2D1 |
+| Reasoner 引入不必要的库              | V3 为矩阵运算引入了 numpy，斐波那契完全不需要                                   | 代码评审关注：是否引入了不必要的依赖                                               | W2D1 |
+| `st.rerun()` 放在按钮外导致无限刷新      | sidebar 历史展示区里放了 st.rerun()，每次渲染都触发重跑                         | st.rerun() 必须放在按钮的 else 分支里，不在展示区                                | W2D1 |
+| Python 函数同名参数覆盖               | `OpenAI(api_key=A, api_key=B)` 后一个 api_key 覆盖前一个，不报错          | 不同端点的 client 各自创建实例，用字典索引                                        | W2D3 |
+| 变量赋值是替换不是追加                   | `client = A; client = B; client = C` 只剩 C 一个值                 | 用字典 `{"a": A, "b": B, "c": C}` 存多个实例                             | W2D3 |
+| 千问模型名填错导致巨慢                   | `qwen3.6-plus` 不是标准名，导致 33 秒才返回                               | 用 `qwen-plus`（DashScope 标准模型名）                                   | W2D3 |
+| Qwen 过度输出                     | 简单问题给出 2000+ Token 论文式回答，Token 是 DS Chat 的 3.3 倍              | 需要精确控制输出长度时加 system prompt 约束，如"用不超过 3 句话回答"                     | W2D4 |
+| f.read() 末尾逗号变元组              | `knowledge = f.read(),` 末尾逗号让变量变成 `(内容,)` 元组而非字符串             | 去掉末尾逗号                                                           | W3D1 |
+| encoding 写在 open() 外面         | `f.read(), encoding="utf-8"` 被 Python 解析为元组                   | `encoding` 是 `open()` 的参数：`open("f.txt", "r", encoding="utf-8")` | W3D1 |
+| HF 下载卡住                       | HuggingFace 在国内被墙，model.safetensors 无进度                       | 用 ModelScope `snapshot_download()` 国内直连                          | W3D1 |
+| OpenAI/OpenAILike 参数名不同       | `OpenAI` 用 `base_url`，`OpenAILike` 用 `api_base`               | 查 `inspect.signature(Class.__init__)` 确认参数名                      | W3D1 |
+| DeepSeek V4 400 错误            | `deepseek-v4-flash` 走 beta 通道，标准接口返回 400                      | `api_base="https://api.deepseek.com/beta"`                       | W3D1 |

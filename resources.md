@@ -1,3 +1,12 @@
+---
+tags:
+  - resources
+  - ai-learning
+  - reference
+created: 2026-05-22
+updated: 2026-05-25
+---
+
 # AI 学习资源库
 > 自动维护，每周更新 | 最后更新: 2026-05-22
 

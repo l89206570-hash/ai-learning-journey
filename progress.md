@@ -1,14 +1,23 @@
+---
+tags:
+  - progress
+  - ai-learning
+  - weekly-log
+created: 2026-05-21
+updated: 2026-05-25
+---
+
 # AI 应用开发学习进度
 
 ## 当前状态
-- **当前周：** W2（W1 已完成）
+- **当前周：** W3（W1-W2 已完成）
 - **开始日期：** 2026-05-21
-- **今日日期：** 2026-05-23
-- **今日工作时长：** 2h
-- **累计工作时长：** 12h
+- **今日日期：** 2026-05-25
+- **今日工作时长：** 7h
+- **累计工作时长：** 19h
 - **状态：** 🟢 正常推进
 - **特殊：** MiMo-V2.5-Pro Token Plan 激活（5/23 → 6/23），已接入 Codex Desktop
-- **兴趣线：** 游戏开发（业余，入职前不主动投入时间）→ 计划见 `game-dev-track.md`
+- **兴趣线：** 游戏开发（业余，入职前不主动投入时间）→ 计划见 `[[game-dev-track]]`
 
 ## 本周进度（W1 — Python 速成）
 - ✅ Day 1 完成：API 调用、函数定义、try/except、for 循环、enumerate、空值过滤
@@ -19,6 +28,12 @@
 ## W2 进度（W2 — 多模型与 API 进阶）
 - ✅ Day 1 完成：多模型对比器 — 字典配置管理、time.time() 计时、response.usage Token 追踪、getattr 安全取值、st.checkbox、st.rerun() + session_state 分离模式、sidebar 对比历史（reversed/[::-1] 倒序）、模型差异分析（Chat vs Reasoner 设计目标）
 - ✅ Day 2 完成：MiMo-V2.5-Pro 接入 — Token Plan 激活（6/23 到期）、mimo2codex 代理部署、Codex Desktop 接入、config.toml 配置
+- ✅ Day 3 完成：4 模型对决 — 多客户端架构（provider 路由）、直连 MiMo Token Plan 端点（免代理）、千问 DashScope 接入、三组任务实测对比（数学推理/代码/翻译）
+- ✅ Day 4 完成：DS vs Qwen 深度对比分析 — 6 条系统化 prompt 覆盖 4 维度、量化差异数据（Token 3.3x / 延迟 6.7x / 正确率相同）、产出面试对比文档 model-comparison.md
+
+## W3 进度（W3 — RAG 基础）
+- ✅ Day 1 完成：RAG 认知 + 第一个问答系统 — Document/Node/Index/QueryEngine 四大核心、BGE 中文嵌入模型、ModelScope 国内下载、OpenAILike 通用接口、DeepSeek V4 beta 端点、RAG vs 直接 LLM 对比
+- ✅ Day 2 完成：RAG 四大核心概念 — 分块策略（chunk_size/chunk_overlap 对比）、检索可视化（source_nodes + similarity score）、索引持久化（build once load many，19x 加速）、Prompt 模板（{context_str}/{query_str} 占位符 + 自定义模板）
 
 ## 遇到的困难
 - f-string 嵌套双引号导致 SyntaxError（已解决：内层改用单引号）
@@ -27,7 +42,7 @@
 - deepseek-chat 偶尔响应 36 秒（已理解：服务端排队，非模型本身问题）
 
 ## 明日计划
-- W2 Day 3：battle.py 升级为 4 模型对决（DS Chat / DS Reasoner / Qwen / MiMo-Pro），重点测 MiMo reasoning 模式
+- W3 Day 3：对话式 RAG — 支持多轮对话（聊天历史 + 追问 + 指代消解），理解 chat engine vs query engine 的区别
 
 ## 已完成的产出
 | 周 | 产出 | 链接 |
@@ -37,6 +52,7 @@
 | W1 | polish_app.py（邮件润色工具 — 独立练习） | projects/w1-translator/polish_app.py |
 | W2 | battle.py（多模型对比器 — 独立从零编写） | projects/w2-model-battle/battle.py |
 | W2 | mimo-30day-plan.md（MiMo 30 天利用计划） | mimo-30day-plan.md |
+| W2 | `[[model-comparison]]`（DS vs Qwen 深度对比分析 + 面试素材） | projects/w2-model-battle/model-comparison.md |
 
 ## 收入记录
 | 日期 | 来源 | 金额 |
