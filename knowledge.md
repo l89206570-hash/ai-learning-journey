@@ -321,6 +321,35 @@ updated: 2026-05-25
 | `get_prompts()` | 查看当前 query engine 使用的默认模板，调试用 | W3D2 |
 | 自定义模板的意义 | 控制 LLM 行为边界——"资料没有就说不知道"防止幻觉，"不超过 3 句话"控制输出长度 | W3D2 |
 
+### chat_engine 对话式 RAG（W3D3）
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| `query_engine` | 无状态，每次 `.query()` 独立，不知道已发生过什么对话 | W3D3 |
+| `chat_engine` | 有状态，内部维护 `chat_history`，自动记住上文 | W3D3 |
+| `chat.chat("消息")` | 发送消息并得到回复，历史自动累积 | W3D3 |
+| `chat.chat_history` | 内部记忆列表，`[{user}, {assistant}, {user}, {assistant}, ...]`，每轮 +2 条 | W3D3 |
+
+### 三种 chat_mode（W3D3-W3D4）
+
+| mode | 原理 | 实测结论 |
+|------|------|---------|
+| `default` | 历史+检索放 messages 列表 | ❌ 新版 LlamaIndex 已废弃 |
+| `condense_question` | 先让 LLM 把追问+历史重写成独立问题，再检索 | ⚠️ 结果不稳定，重写后检索可能跑偏 |
+| `context` | 聊天历史全文塞进 system prompt | ✅ 中文多轮最稳定，指代消解能力最强 |
+
+### chat_engine 进阶（W3D4）
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| `chat.reset()` | 清空全部聊天历史，适合话题彻底切换 | W3D4 |
+| `stream_chat()` | 流式输出，逐 token 实时返回，提升用户体验 | W3D4 |
+| `response.response_gen` | 流式输出的生成器，`for chunk in ...: print(chunk, end="")` | W3D4 |
+| `response.source_nodes` | 查看 LLM 回答的检索依据（原文片段 + 相似度分数） | W3D4 |
+| `source.score` | 相似度 0~1，但高分≠精确——实验发现检索到退货政策但 LLM 仍能答对会员权益 | W3D4 |
+| `AgentChatResponse` | chat_engine 返回的类型（不是普通字符串），含多个属性 | W3D4 |
+| 检索≠回答依据 | LLM 可能在检索不相关时用自己的知识回答——知识库更新时是风险 | W3D4 |
+
 ### 项目环境搭建
 
 | 概念 | 要点 | 来源 |
