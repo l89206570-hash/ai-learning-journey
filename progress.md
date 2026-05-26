@@ -4,7 +4,7 @@ tags:
   - ai-learning
   - weekly-log
 created: 2026-05-21
-updated: 2026-05-25
+updated: 2026-05-26
 ---
 
 # AI 应用开发学习进度
@@ -12,9 +12,9 @@ updated: 2026-05-25
 ## 当前状态
 - **当前周：** W3（W1-W2 已完成）
 - **开始日期：** 2026-05-21
-- **今日日期：** 2026-05-25
-- **今日工作时长：** 9h
-- **累计工作时长：** 21h
+- **今日日期：** 2026-05-26
+- **今日工作时长：** 12h
+- **累计工作时长：** 24h
 - **状态：** 🟢 正常推进
 - **特殊：** MiMo-V2.5-Pro Token Plan 激活（5/23 → 6/23），已接入 Codex Desktop
 - **兴趣线：** 游戏开发（业余，入职前不主动投入时间）→ 计划见 `[[game-dev-track]]`
@@ -35,7 +35,9 @@ updated: 2026-05-25
 - ✅ Day 1 完成：RAG 认知 + 第一个问答系统 — Document/Node/Index/QueryEngine 四大核心、BGE 中文嵌入模型、ModelScope 国内下载、OpenAILike 通用接口、DeepSeek V4 beta 端点、RAG vs 直接 LLM 对比
 - ✅ Day 2 完成：RAG 四大核心概念 — 分块策略（chunk_size/chunk_overlap 对比）、检索可视化（source_nodes + similarity score）、索引持久化（build once load many，19x 加速）、Prompt 模板（{context_str}/{query_str} 占位符 + 自定义模板）
 - ✅ Day 3 完成：对话式 RAG — chat_engine 有状态 vs query_engine 无状态对比、chat_mode="context" 指代消解（"它"→退货）、chat.chat_history 内部状态检查、三种 chat_mode 行为差异（default 反问 vs condense_question 重写 vs context 全文记忆）
-- ✅ Day 4 完成：对话式 RAG 进阶 — reset() 记忆管理（清空后失忆验证）、response.source_nodes 检索依据查看、三种 chat_mode 场景实测对比（condense_question 结果不稳定 vs context 最稳）、chat_engine 类型为 AgentChatResponse、stream_chat() 流式输出逐 token 打印
+- ✅ Day 4 完成：对话式 RAG 进阶 — reset() 记忆管理 + response.source_nodes + chat_mode 实测 + stream_chat() 流式输出
+- ✅ Day 5 完成：多文档索引 — Document metadata 打标签 + 跨文档检索 + MetadataFilter 过滤 + MetadataFilters 组合 AND
+- ✅ Day 6 完成：面试题库 RAG 实操 — 从零写多文档索引 + 三种查询模式 + import 差异理解 + condition 大小写踩坑
 
 ## 遇到的困难
 - f-string 嵌套双引号导致 SyntaxError（已解决：内层改用单引号）
@@ -44,7 +46,7 @@ updated: 2026-05-25
 - deepseek-chat 偶尔响应 36 秒（已理解：服务端排队，非模型本身问题）
 
 ## 明日计划
-- W3 Day 5：文档问答 — 多文档索引、跨文档检索、文档元数据过滤
+- W3 Day 7：继续 RAG 进阶
 
 ## 已完成的产出
 | 周 | 产出 | 链接 |
@@ -57,6 +59,8 @@ updated: 2026-05-25
 | W2 | `[[model-comparison]]`（DS vs Qwen 深度对比分析 + 面试素材） | projects/w2-model-battle/model-comparison.md |
 | W3 | chat_engine.py（对话式 RAG — 有状态 vs 无状态对比） | projects/w3-rag-basics/chat_engine.py |
 | W3 | day4_chat_advanced.py（记忆管理 + response 结构 + mode 对比） | projects/w3-rag-basics/day4_chat_advanced.py |
+| W3 | day5_multi_doc.py（多文档索引 + 元数据过滤） | projects/w3-rag-basics/day5_multi_doc.py |
+| W3 | day6_build_index.py + day6_query.py（面试题库 RAG — 从零实操） | projects/w3-rag-basics/day6_query.py |
 
 ## 收入记录
 | 日期 | 来源 | 金额 |

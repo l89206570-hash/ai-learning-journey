@@ -350,6 +350,40 @@ updated: 2026-05-25
 | `AgentChatResponse` | chat_engine 返回的类型（不是普通字符串），含多个属性 | W3D4 |
 | 检索≠回答依据 | LLM 可能在检索不相关时用自己的知识回答——知识库更新时是风险 | W3D4 |
 
+### 多文档索引（W3D5）
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| `Document(text, metadata)` | metadata 是 dict，可存 category/source/date 等任意标签，Node 切分时继承 | W3D5 |
+| 跨文档检索 | 所有 Document 的 Node 进同一个向量库，检索自动跨越文档边界，不需切换代码 | W3D5 |
+| `MetadataFilter(key, operator, value)` | 单条过滤规则：字段名 + 运算符 + 目标值 | W3D5 |
+| `MetadataFilters(filters, condition)` | 组合多条 MetadataFilter，condition 为 `"and"` / `"or"`（注意小写） | W3D5 |
+| `FilterOperator.EQ` | 等值比较，还有 NE/GT/LT/GTE/LTE/IN | W3D5 |
+| `index.as_query_engine(filters=...)` | 检索时加过滤筛子，同一份索引可用不同 filter 反复查，不需重建 | W3D5 |
+| `condition="and"` vs `"AND"` | 必须小写，大写会触发 Pydantic 校验错误 | W3D5 |
+
+### 建索引 vs 查询的导入差异（W3D6）
+
+| 导入 | 建索引 | 查询 | 原因 |
+|------|:--:|:--:|------|
+| `Document` | ✅ | ❌ | 建索引需包装文本，查询时已在索引里 |
+| `VectorStoreIndex` | ✅ | ❌ | 查询用 `load_index_from_storage` 替代 |
+| `SentenceSplitter` | ✅ | ❌ | 切分一次性，查询时 Node 已切好 |
+| `MetadataFilters/MetadataFilter/FilterOperator` | ❌ | ✅ | 过滤是查询时加的筛子 |
+| `load_index_from_storage` | ❌ | ✅ | 建索引写磁盘，查询读磁盘 |
+
+共同依赖：`Settings`、`StorageContext`、嵌入模型、LLM — 不管建还是查都要配。
+
+### 初级 RAG vs 生产级 RAG
+
+| 维度 | 你现在 | 生产级 |
+|------|--------|--------|
+| 文档量 | 4 份 | 数千～百万份 |
+| 存储 | 本地文件 | 向量数据库（Chroma/Milvus/Pinecone） |
+| 检索策略 | 纯向量相似度 | 混合检索（向量 + BM25 关键词） |
+| 结果优化 | 无 | 重排序（ReRanker） |
+| 分块 | 固定 512 | 按文档结构智能切分 |
+
 ### 项目环境搭建
 
 | 概念 | 要点 | 来源 |
@@ -386,3 +420,6 @@ updated: 2026-05-25
 | HF 下载卡住                       | HuggingFace 在国内被墙，model.safetensors 无进度                       | 用 ModelScope `snapshot_download()` 国内直连                          | W3D1 |
 | OpenAI/OpenAILike 参数名不同       | `OpenAI` 用 `base_url`，`OpenAILike` 用 `api_base`               | 查 `inspect.signature(Class.__init__)` 确认参数名                      | W3D1 |
 | DeepSeek V4 400 错误            | `deepseek-v4-flash` 走 beta 通道，标准接口返回 400                      | `api_base="https://api.deepseek.com/beta"`                       | W3D1 |
+| `MetadataFilters` condition 大小写 | `condition="AND"` 触发 Pydantic ValidationError，报 enum 错误         | 必须用小写 `condition="and"`                                         | W3D6 |
+| deepseek-v4-flash Empty Response | 检索正常但 LLM 返回空，Django 问题正常但 CSS 问题为空——非代码 bug，模型行为不稳定          | 单次只问一件事，或换 deepseek-chat                                        | W3D5 |
+| query.py 缺少 Settings 配置       | 加载索引后直接用 as_query_engine 但没配 embed_model 和 llm，导致查询时无模型可用   | 在 load_index_from_storage 之前配好 Settings.embed_model + Settings.llm | W3D6 |

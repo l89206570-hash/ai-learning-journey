@@ -1,0 +1,15 @@
+## 前端基础面试题
+
+### HTML/CSS
+Q: 说一下盒模型
+A: CSS 盒模型有两种：标准盒模型（content-box）和 IE 盒模型（border-box）。标准盒模型的 width 只包含 content；IE 盒模型的 width 包含 content + padding + border。可以通过 box-sizing 属性切换。
+
+Q: flex 布局常用属性
+A: 容器属性：display:flex, justify-content（主轴对齐）, align-items（交叉轴对齐）, flex-direction（主轴方向）, flex-wrap（换行）。项目属性：flex（简写 grow/shrink/basis）, align-self（单独对齐）。
+
+### JavaScript
+Q: 闭包是什么
+A: 闭包是函数能访问其外部作用域变量的能力。原理是函数执行时会创建执行上下文和词法环境，内部函数保持对外部词法环境的引用，即使外部函数已执行完毕。常见用途：数据私有化、回调函数、函数工厂。
+
+Q: Promise 和 async/await 的区别
+A: async/await 是 Promise 的语法糖。前者写法像同步代码，用 try/catch 捕获错误；后者用 .then()/.catch() 链式调用。async/await 更易读，但 Promise.all() 在处理并发请求时更方便。

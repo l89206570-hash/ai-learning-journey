@@ -1,0 +1,18 @@
+## 前端框架面试题
+
+### React
+Q: React 的虚拟 DOM 原理
+A: React 在内存中维护一棵虚拟 DOM 树（JS 对象），状态变化时生成新的虚拟 DOM，通过 Diff 算法（同层比较 + key 优化）找出差异，最后批量更新真实 DOM。这避免了直接操作 DOM 的性能开销。
+
+Q: useState 和 useEffect 的用法
+A: useState 用于在函数组件中管理状态，返回 [state, setState]。useEffect 用于处理副作用（数据请求、DOM 操作、订阅），第二个参数是依赖数组，空数组表示只在挂载时执行一次，不传则每次渲染都执行。
+
+Q: React.memo 和 useMemo 的区别
+A: React.memo 是 HOC，包裹组件后对 props 做浅比较，不变则跳过渲染。useMemo 是 Hook，在组件内部缓存计算结果。前者缓存组件，后者缓存值。
+
+### Vue
+Q: Vue 的响应式原理
+A: Vue2 用 Object.defineProperty 劫持 getter/setter；Vue3 用 Proxy 代理整个对象，解决了 Vue2 无法检测新增属性和数组索引变化的问题。依赖收集通过 Dep 和 Watcher 实现，数据变化时自动通知组件更新。
+
+Q: computed 和 watch 的区别
+A: computed 是计算属性，基于依赖缓存，只有依赖变化才重新计算，有返回值。watch 是侦听器，监听数据变化后执行异步操作或副作用，默认不缓存。computed 适合展示层逻辑，watch 适合数据变化后的操作。
