@@ -213,7 +213,9 @@ updated: 2026-05-25
 | 脚本重跑 | 每次用户交互，整个脚本从头到尾重新执行一次 | W1D3 |
 | 组件 key | 相同组件需要唯一 `key` 参数区分，否则报 `DuplicateElementId` | W1D3 |
 | 变量不持久 | 普通变量每次重跑重置，要持久化用 `st.session_state` | W1D3 |
-| `st.rerun()` | 手动触发页面重跑，配合 session_state 使用：按钮里存数据 → rerun → 展示区读数据渲染 | W2D1 |
+| `st.rerun()` | **停止当前脚本，从头重新执行。** 之后的代码不会运行。必须放在条件分支里，裸奔在外面会无限循环。先改数据再 rerun，下次进来值相等跳过 if | W2D1, W3D7 |
+| `st.rerun()` 防无限循环 | 开关模式：`if 值变了 → 改值 → 重建 → rerun（重启）→ 值相等 → 跳过 if → 正常渲染` | W3D7 |
+| session_state vs chat_mode | session_state 是**保活容器**（让对象跨重跑存活），chat_mode="context" 是**记忆机制**（把历史塞进 system prompt）。两者解决不同问题 | W3D7 |
 | session_state 分离 | 展示用完整数据（last_battle），历史存截断版（battle_history），各司其职省内存 | W2D1 |
 
 ### 新增组件
@@ -221,6 +223,14 @@ updated: 2026-05-25
 | 概念 | 要点 | 来源 |
 |------|------|------|
 | `st.checkbox()` | 勾选框，返回 `True/False`，`value=True` 设置默认勾选，`help=` 鼠标悬停提示 | W2D1 |
+
+### Chat 组件（W3D7）
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| `st.chat_input()` | 对话式输入框，自动带输入提示，用户回车后返回字符串 | W3D7 |
+| `st.chat_message(role)` | 聊天气泡容器，`role="user"` 或 `"assistant"`，`with` 块内写内容 | W3D7 |
+| `st.write_stream(generator)` | 接收 generator，逐个 yield 渲染，返回完整字符串——替代手动 `for chunk in gen` 拼接 | W3D7 |
 
 ---
 ## [[Python 进阶]]
@@ -271,6 +281,28 @@ updated: 2026-05-25
 | BAAI/bge-small-zh-v1.5 | 中文优化的轻量嵌入模型，本地运行不调 API | W3D1 |
 | ModelScope 下载 | `snapshot_download("模型名")` 从阿里云国内直连下载，替代 HuggingFace | W3D1 |
 | HF 镜像 | `os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"` 但不如 ModelScope 稳定 | W3D1 |
+
+#### 嵌入模型 vs LLM（W3D7 核心认知）
+
+> 两者是完全不同的模型，在 RAG 里各司其职：
+
+| | 嵌入模型 (Embedding) | 大模型 (LLM) |
+|---|---|---|
+| 干什么 | 文字 → 向量（浮点数数组） | 文字 → 文字（生成回答） |
+| 不能干什么 | 不会写句子、不会回答问题 | 不会算两段话有多相似 |
+| 输入 | `"云感T恤 129 元"` | `"根据以下资料回答：{检索结果}，问题是：{用户问题}"` |
+| 输出 | `[0.12, -0.34, 0.67, ...]` | `"您好，云感T恤售价 129 元"` |
+| 项目里用的 | `BAAI/bge-small-zh-v1.5`（本地 CPU） | `deepseek-v4-flash`（DeepSeek 服务器） |
+| 调用时机 | 建索引 + 每次查询向量化问题 | 检索完成后生成回答 |
+
+#### 常用嵌入模型速查
+
+| 模型 | 维度 | 语言 | 特点 |
+|------|------|------|------|
+| `BAAI/bge-small-zh-v1.5` | 512 | 中文 | 轻量本地跑，你正在用 |
+| `BAAI/bge-large-zh-v1.5` | 1024 | 中文 | 同系列大号，更准但更慢 |
+| `text-embedding-3-small` | 512 | 多语言 | OpenAI，API 调用按 Token 计费 |
+| `moka-ai/m3e-base` | 768 | 中文 | 开源社区常用，ModelScope 可下 |
 
 ### [[LlamaIndex]] 配置
 
@@ -384,6 +416,44 @@ updated: 2026-05-25
 | 结果优化 | 无 | 重排序（ReRanker） |
 | 分块 | 固定 512 | 按文档结构智能切分 |
 
+### 动态过滤切换（W3D7）
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| 重建 chat_engine | 切换品类时不能只改 filter 参数，必须重建整个 chat_engine（因为 filter 是创建时固化的） | W3D7 |
+| 切换检测模式 | session_state 存 `current_category`，每次渲染对比 radio 值 → 变了就删旧 engine → 重建 → `st.rerun()` | W3D7 |
+| chat_engine 生命周期 | 存在 `st.session_state["chat"]` 里跨重跑存活；品类切换或重置时删除/重建 | W3D7 |
+| 先改值再 rerun | `current_category = 新值 → 重建 engine → st.rerun()`。如果先 rerun 再改值，下次进来值没变又会触发 | W3D7 |
+
+### RAG 数据结构类型（W3D7）
+
+| 类型 | 来源 | 访问方式 | 易错点 |
+|------|------|---------|--------|
+| `ChatMessage` | `chat.chat_history[i]` | `msg.role.value` / `msg.content` | 不是 dict，不能用 `msg["role"]` |
+| `NodeWithScore` | `response.source_nodes[i]` | `node.score` / `node.node.metadata` / `node.node.text` | metadata 在 `.node` 里，不是顶层 |
+| `ChatMessage.role` | 枚举 `MessageRole.USER` / `MessageRole.ASSISTANT` | `.value` 拿到 `"user"` / `"assistant"` 字符串 | 不调 `.value` 拿的是枚举对象不是字符串 |
+
+### 对话双重存储（W3D7）
+
+| 存储位置 | 格式 | 谁在用 | 怎么维护 | 删了会怎样 |
+|----------|------|--------|---------|-----------|
+| `st.session_state["messages"]` | `[{"role": "user", "content": "..."}]` | 你（渲染页面） | 手动 append | 页面上看不到历史，LLM 记忆不受影响 |
+| `chat.chat_history` | `[ChatMessage, ChatMessage, ...]` | LlamaIndex（context mode） | chat_engine 自动维护 | AI 失去上下文记忆，变回无状态问答 |
+| 为什么两个都要 | messages 让你自由控制页面显示，chat_history 让 LlamaIndex 把历史塞进 prompt。各管各的 | W3D7 |
+
+### RAG 全链路（W3D7 总结）
+
+```
+文档 → Document → Node → Embedding模型 → 向量 → 索引存储
+                                                    ↓
+用户问题 → Embedding模型 → 问题向量 → 余弦相似度匹配 → top_k Node
+                                                    ↓
+                            LLM ← prompt(检索结果 + 问题 + 聊天历史)
+                                                    ↓
+                                                流式回答
+```
+| 来源 | W3D7 |
+
 ### 项目环境搭建
 
 | 概念 | 要点 | 来源 |
@@ -423,3 +493,7 @@ updated: 2026-05-25
 | `MetadataFilters` condition 大小写 | `condition="AND"` 触发 Pydantic ValidationError，报 enum 错误         | 必须用小写 `condition="and"`                                         | W3D6 |
 | deepseek-v4-flash Empty Response | 检索正常但 LLM 返回空，Django 问题正常但 CSS 问题为空——非代码 bug，模型行为不稳定          | 单次只问一件事，或换 deepseek-chat                                        | W3D5 |
 | query.py 缺少 Settings 配置       | 加载索引后直接用 as_query_engine 但没配 embed_model 和 llm，导致查询时无模型可用   | 在 load_index_from_storage 之前配好 Settings.embed_model + Settings.llm | W3D6 |
+| `st.rerun()` 放 if 外导致无限刷新     | `st.session_state["messages"] = []` 和 `st.rerun()` 没缩进在 `if st.button()` 内，每次渲染都触发 | st.rerun() 必须在按钮的 if 分支里面 | W3D7 |
+| `for msg,` 多余逗号               | `for msg, in list` 被 Python 解析为元组解包，ChatMessage 对象不可迭代 | 去掉末尾逗号：`for msg in list` | W3D7 |
+| ChatMessage 当成 dict 用          | `msg["role"]` 访问 ChatMessage 对象，但它是对象不是字典 | 用 `msg.role.value` 和 `msg.content` 属性访问 | W3D7 |
+| source_nodes 层级混淆             | `node.metadata` 直接取——`source_nodes` 返回的是 `NodeWithScore` 列表，metadata 在 `node.node.metadata` 里 | 用 `node.node.metadata` 取元数据 | W3D7 |

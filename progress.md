@@ -10,12 +10,12 @@ updated: 2026-05-26
 # AI 应用开发学习进度
 
 ## 当前状态
-- **当前周：** W3（W1-W2 已完成）
+- **当前周：** W3（W1-W3 已完成）
 - **开始日期：** 2026-05-21
-- **今日日期：** 2026-05-26
-- **今日工作时长：** 12h
-- **累计工作时长：** 24h
-- **状态：** 🟢 正常推进
+- **今日日期：** 2026-05-27
+- **今日工作时长：** 4h
+- **累计工作时长：** 28h
+- **状态：** 🟢 W3 完成，明日进入 W4
 - **特殊：** MiMo-V2.5-Pro Token Plan 激活（5/23 → 6/23），已接入 Codex Desktop
 - **兴趣线：** 游戏开发（业余，入职前不主动投入时间）→ 计划见 `[[game-dev-track]]`
 
@@ -38,15 +38,19 @@ updated: 2026-05-26
 - ✅ Day 4 完成：对话式 RAG 进阶 — reset() 记忆管理 + response.source_nodes + chat_mode 实测 + stream_chat() 流式输出
 - ✅ Day 5 完成：多文档索引 — Document metadata 打标签 + 跨文档检索 + MetadataFilter 过滤 + MetadataFilters 组合 AND
 - ✅ Day 6 完成：面试题库 RAG 实操 — 从零写多文档索引 + 三种查询模式 + import 差异理解 + condition 大小写踩坑
+- ✅ Day 7 完成：RAG 综合实战 — 电商客服 RAG 从零搭建：多文档索引 + 品类过滤 + chat_engine context 模式 + stream_chat 流式输出 + chat_history 记忆 + Streamlit chat 组件 + 动态过滤切换
 
 ## 遇到的困难
 - f-string 嵌套双引号导致 SyntaxError（已解决：内层改用单引号）
 - 变量使用在赋值之前（已理解：代码执行顺序）
 - 展示区错误嵌套在按钮内（已理解：st.rerun() 后展示区必须在按钮外部）
 - deepseek-chat 偶尔响应 36 秒（已理解：服务端排队，非模型本身问题）
+- Day 7: st.rerun() 放 if 外导致无限循环（已理解：破坏性操作必须放条件分支内）
+- Day 7: chat_history 返回对象不是字典，用 .role.value 和 .content 属性访问
+- Day 7: source_nodes 层级 — response.source_nodes[i].node.metadata 不是 .metadata
 
 ## 明日计划
-- W3 Day 7：继续 RAG 进阶
+- W4 Day 1：向量数据库 ChromaDB 入门
 
 ## 已完成的产出
 | 周 | 产出 | 链接 |
@@ -61,6 +65,7 @@ updated: 2026-05-26
 | W3 | day4_chat_advanced.py（记忆管理 + response 结构 + mode 对比） | projects/w3-rag-basics/day4_chat_advanced.py |
 | W3 | day5_multi_doc.py（多文档索引 + 元数据过滤） | projects/w3-rag-basics/day5_multi_doc.py |
 | W3 | day6_build_index.py + day6_query.py（面试题库 RAG — 从零实操） | projects/w3-rag-basics/day6_query.py |
+| W3 | day7_app.py（电商客服 RAG 综合实战 — 流式对话 + 品类过滤 + 记忆管理） | projects/w3-rag-basics/day7_app.py |
 
 ## 收入记录
 | 日期 | 来源 | 金额 |
