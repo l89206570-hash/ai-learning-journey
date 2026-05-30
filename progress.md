@@ -10,12 +10,12 @@ updated: 2026-05-26
 # AI 应用开发学习进度
 
 ## 当前状态
-- **当前周：** W3（W1-W3 已完成）
+- **当前周：** W4（Day 4 完成）
 - **开始日期：** 2026-05-21
-- **今日日期：** 2026-05-27
+- **今日日期：** 2026-05-29
 - **今日工作时长：** 4h
-- **累计工作时长：** 28h
-- **状态：** 🟢 W3 完成，明日进入 W4
+- **累计工作时长：** 38h
+- **状态：** 🟢 W4 Day 4 完成
 - **特殊：** MiMo-V2.5-Pro Token Plan 激活（5/23 → 6/23），已接入 Codex Desktop
 - **兴趣线：** 游戏开发（业余，入职前不主动投入时间）→ 计划见 `[[game-dev-track]]`
 
@@ -31,14 +31,19 @@ updated: 2026-05-26
 - ✅ Day 3 完成：4 模型对决 — 多客户端架构（provider 路由）、直连 MiMo Token Plan 端点（免代理）、千问 DashScope 接入、三组任务实测对比（数学推理/代码/翻译）
 - ✅ Day 4 完成：DS vs Qwen 深度对比分析 — 6 条系统化 prompt 覆盖 4 维度、量化差异数据（Token 3.3x / 延迟 6.7x / 正确率相同）、产出面试对比文档 model-comparison.md
 
-## W3 进度（W3 — RAG 基础）
-- ✅ Day 1 完成：RAG 认知 + 第一个问答系统 — Document/Node/Index/QueryEngine 四大核心、BGE 中文嵌入模型、ModelScope 国内下载、OpenAILike 通用接口、DeepSeek V4 beta 端点、RAG vs 直接 LLM 对比
-- ✅ Day 2 完成：RAG 四大核心概念 — 分块策略（chunk_size/chunk_overlap 对比）、检索可视化（source_nodes + similarity score）、索引持久化（build once load many，19x 加速）、Prompt 模板（{context_str}/{query_str} 占位符 + 自定义模板）
-- ✅ Day 3 完成：对话式 RAG — chat_engine 有状态 vs query_engine 无状态对比、chat_mode="context" 指代消解（"它"→退货）、chat.chat_history 内部状态检查、三种 chat_mode 行为差异（default 反问 vs condense_question 重写 vs context 全文记忆）
-- ✅ Day 4 完成：对话式 RAG 进阶 — reset() 记忆管理 + response.source_nodes + chat_mode 实测 + stream_chat() 流式输出
-- ✅ Day 5 完成：多文档索引 — Document metadata 打标签 + 跨文档检索 + MetadataFilter 过滤 + MetadataFilters 组合 AND
-- ✅ Day 6 完成：面试题库 RAG 实操 — 从零写多文档索引 + 三种查询模式 + import 差异理解 + condition 大小写踩坑
-- ✅ Day 7 完成：RAG 综合实战 — 电商客服 RAG 从零搭建：多文档索引 + 品类过滤 + chat_engine context 模式 + stream_chat 流式输出 + chat_history 记忆 + Streamlit chat 组件 + 动态过滤切换
+- ✅ Day 4 完成：Prompt 标准化实战 — battle.py 接入五段法模板系统 + 3 条固定测试
+- ✅ Day 3 完成：Prompt Engineering 进阶 — 结构化五段法（System/Context/Instruction/Examples/Constraints）+ 裸奔 vs 一句话 vs 五段法实测对比
+
+## W4 进度（W4 — RAG 进阶：向量数据库）
+- ✅ Day 1 完成：ChromaDB 入门 — 核心概念（Client/Collection/Embedding Function）、语义搜索 + 元数据过滤、CRUD、持久化、ChromaDB + LlamaIndex 集成（ChromaVectorStore/StorageContext）
+- ✅ Day 2 完成：ChromaDB 应用实战 — 将 W3 Day 7 电商客服从 SimpleVectorStore 迁移到 ChromaDB，拆分 build_index.py + app.py，验证语义检索、品类过滤、流式对话、上下文记忆
+
+## 遇到的困难
+- ChromaDB 默认英文嵌入模型 all-MiniLM-L6-v2 从 AWS S3 下载极慢（80MB，国内网络） → 改用 ModelScope 缓存的 BGE 中文模型本地路径
+- HF 镜像 hf-mirror.com 在国内也连不上 → 直接用 ModelScope 本地缓存路径
+- LlamaIndex 0.14+ 移除内置 openai_like，新版 OpenAI 类校验模型名白名单 → 需单独 pip install llama-index-llms-openai-like
+- load_index_from_storage() 只传 vector_store 不够 → 需先 persist 索引元数据，加载时同时传 persist_dir
+- Windows 终端 GBK 编码无法打印 emoji → 避免在 print 中用 emoji
 
 ## 遇到的困难
 - f-string 嵌套双引号导致 SyntaxError（已解决：内层改用单引号）
@@ -48,9 +53,16 @@ updated: 2026-05-26
 - Day 7: st.rerun() 放 if 外导致无限循环（已理解：破坏性操作必须放条件分支内）
 - Day 7: chat_history 返回对象不是字典，用 .role.value 和 .content 属性访问
 - Day 7: source_nodes 层级 — response.source_nodes[i].node.metadata 不是 .metadata
+- Day 2: `VectorStoreIndex()` 没赋值给变量直接调 persist → NameError（已理解：必须先赋值 `index = ...`）
+- Day 2: `client` 拼成 `cilent` → NameError（已理解：变量名写错不会报语法错，运行时才炸）
+- Day 2: `as_chat_mode` vs `as_chat_engine`（已理解：方法名写错同理运行时才报错）
+- Day 2: `MetadataFilter` 写成 `MetadataFilters`（已理解：单数是过滤条，复数是装多条规则的容器）
+- Day 2: metadata category 不一致（build_index 写"产品介绍"但 app 过滤"产品"）→ 品类筛选无结果（已理解：两端值必须完全一致）
+- Day 2: 品类切换重建 chat_engine → 上下文丢失（已理解：切换品类 = 新会话，是当前设计的 trade-off）
+- Day 2: W4 venv 缺 streamlit → ModuleNotFoundError（已解决：`pip install streamlit`）
 
 ## 明日计划
-- W4 Day 1：向量数据库 ChromaDB 入门
+- W4 Day 5：Agent Loop 手写 — 不用任何框架，用纯 `OpenAI().chat.completions.create()` 写 Agent 循环（≤100 行）
 
 ## 已完成的产出
 | 周 | 产出 | 链接 |
@@ -66,6 +78,13 @@ updated: 2026-05-26
 | W3 | day5_multi_doc.py（多文档索引 + 元数据过滤） | projects/w3-rag-basics/day5_multi_doc.py |
 | W3 | day6_build_index.py + day6_query.py（面试题库 RAG — 从零实操） | projects/w3-rag-basics/day6_query.py |
 | W3 | day7_app.py（电商客服 RAG 综合实战 — 流式对话 + 品类过滤 + 记忆管理） | projects/w3-rag-basics/day7_app.py |
+| W4 | day1_chromadb_basics.py（ChromaDB 核心概念 — Collection/语义搜索/元数据过滤/CRUD/持久化） | projects/w4-chromadb/day1_chromadb_basics.py |
+| W4 | day1_chromadb_llamaindex.py（ChromaDB + LlamaIndex 集成 — ChromaVectorStore/StorageContext/build once load many） | projects/w4-chromadb/day1_chromadb_llamaindex.py |
+| W4 | build_index.py（ChromaDB 电商知识库建索引 — PersistentClient + create_collection + persist） | projects/w4-chromadb/build_index.py |
+| W4 | app.py（电商客服 Streamlit 界面 — ChromaDB 后端 + 品类过滤 + 流式对话 + 检索来源） | projects/w4-chromadb/app.py |
+| W4 | day3_prompt_engineering.py（Prompt Engineering 五段法 — 裸奔 vs 一句话 vs 结构化实测对比） | projects/w4-chromadb/day3_prompt_engineering.py |
+| W4 | battle.py（升级版 — 接入五段法模板系统 + selectbox 切换 + text_area 可编辑） | projects/w2-model-battle/battle.py |
+| W4 | day4_test_cases.py（固定测试集 — 3 条场景测试 + check_contains 关键词检查） | projects/w4-chromadb/day4_test_cases.py |
 
 ## 收入记录
 | 日期 | 来源 | 金额 |

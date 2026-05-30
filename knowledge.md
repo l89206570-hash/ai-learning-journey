@@ -463,6 +463,165 @@ updated: 2026-05-25
 
 ---
 
+## [[Prompt Engineering 进阶]]（W4D3）
+
+### 结构化 Prompt 五段法
+
+| 段落 | 作用 | 回答的问题 |
+|------|------|-----------|
+| **System** | 角色定义 | 你是谁？ |
+| **Context** | 背景信息 | 目标用户/平台/竞品是什么？ |
+| **Instruction** | 具体指令 + 输出格式 | 做什么？步骤？输出什么结构？ |
+| **Examples** | 正例 + 反例 | 什么样算好？什么样算差？ |
+| **Constraints** | 约束条件 | 不能做什么？长度/风格限制？ |
+
+### 实测对比（中文商品描述 → 英文亚马逊 listing）
+
+| 版本 | Token | 耗时 | 标题质量 | 卖点呈现 | 输出格式 |
+|------|-------|------|---------|---------|---------|
+| A. 裸奔 | 1197 | 12.1s | 中式直译 | 黏在一起 | 自由发挥 |
+| B. 一句话 | 537 | 4.8s | 略有优化 | 有分段 | 自由发挥 |
+| C. 五段法 | 1460 | 10.3s | SEO 友好 | 逐一拆开 | 严格按模板 |
+
+**结论：** 五段法 Token 最多但买到了可控性——固定输出格式、卖点分离清晰、英文更地道。工程化场景里这点成本换稳定性完全值得。
+
+### 核心认知
+
+- **可控性 > Token 成本：** 多花几百 Token 换来固定结构，后续解析/展示不用再猜格式
+- **Constraint 比 Instruction 更有效：** "不要直译"四个字挡掉了前两个版本的主要问题
+- **工作流化：** prompt 模板固化后，同品类（裤子/鞋子/配件）只需换 Context，不复用重写
+
+| 来源 | W4D3 |
+
+### Prompt 工程化实战（W4D4）
+
+> 将 battle.py 从"无 system prompt"升级为可切换、可编辑的模板系统。
+
+**改造内容：**
+- `PROMPT_TEMPLATES` 字典管理 4 个场景（无模板/翻译/代码/推理），每个用五段法
+- sidebar 加 `selectbox` 选场景 + `expander` 内 `text_area` 可编辑 prompt
+- `day4_test_cases.py`：3 条固定测试，每次改 prompt 后跑一遍验证
+
+**踩坑：**
+- **prompt 一致性：** 改一段（Context）没改另一段（Examples），模型跟着旧信息跑偏。全部关联段落要同步改
+- **user message 权重 ≥ system prompt：** 两边冲突时模型倾向信 user message。改了 prompt 模板还要检查输入里有没有矛盾信息
+- **测试关键词要对齐语言：** `check_contains` 用中文关键词但模型输出英文 → 误报 FAIL。关键词要和 prompt 约束的输出语言一致
+
+### 独立练习：邮件润色场景（W4D4）
+
+> 不看代码模板，从零写一个邮件润色的五段法 prompt。
+
+**学到的：**
+- **Context 不要列能力：** 第一次写了四条"你能够..."在凑数。Context 是给背景信息（发件人身份、收件人、行业），不是复读 System
+- **输出格式要提前定：** 没指定格式时模型跑出流水文。加了 `【润色后邮件】` + `【修改建议】` 后输出可解析、用户知道改了哪里
+- **约束要贴近业务：** 邮件场景最关键的约束是"不改变原意（时间/地点/金额/需求）"，不是泛泛的"回答清晰"
+
+**模板 vs 无模板实测对比（中文商务邮件 → 英文）：**
+
+| | 无模板 | 邮件模板 |
+|------|--------|---------|
+| 邮件正文 | 英文，格式基本正确 | 英文，结构更完整（含 Subject） |
+| 修改说明 | 无 | 逐条指出改了什么、为什么改 |
+| 公司名纠错 | 自动改了 SUMSUNG→Samsung | 改了并说明原因 |
+| 缺失信息 | 不提示 | 提示"网址缺失，建议补充" |
+| 整体价值 | 翻译完就没了 | 翻译 + 教学，知道怎么改进 |
+
+**结论：** 无模板也能翻对，但邮件模板多了"告诉用户为什么改"——这才是业务场景里的增值部分。
+
+| 来源 | W4D4 |
+
+---
+
+## [[ChromaDB]] 向量数据库（W4D1）
+
+### 核心概念
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| 向量数据库 | 存语义（向量）而非存文字——通过比较向量距离来判断"是不是在说同一件事" | W4D1 |
+| ChromaDB | 轻量开源向量数据库，Python 原生，适合小中型项目（1000~百万级文档） | W4D1 |
+| Collection | ChromaDB 的组织单元，类似 SQL 表——存 documents + embeddings + metadatas + ids | W4D1 |
+| `chromadb.PersistentClient()` | 持久化模式，数据存硬盘，重启还在。比 LlamaIndex 手动 persist 更自动 | W4D1 |
+| `collection.add()` | 添加文档，ChromaDB 自动调嵌入模型向量化后存库 | W4D1 |
+| `collection.query()` | 问题自动向量化→和库里所有向量比距离→返回 top_k。传 `query_texts` + `n_results` | W4D1 |
+| distance（距离） | ChromaDB 默认返回余弦距离，**越小越相似**（0=完全相同）。和 LlamaIndex score（越大越相似）相反 | W4D1 |
+
+### 嵌入函数
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| `embedding_function` | 创建 Collection 时指定，负责把文字转成向量。ChromaDB 自带英文模型，中文场景必须换 | W4D1 |
+| `SentenceTransformerEmbeddingFunction` | ChromaDB 方式加载模型：`model_name=` 可接 HuggingFace 模型名或本地路径 | W4D1 |
+| 本地模型路径 | 用 ModelScope 缓存的绝对路径（`~/.cache/modelscope/hub/models/...`），跳过网络下载 | W4D1 |
+
+### 元数据过滤
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| `where={"key": "value"}` | 精确过滤，等于 LlamaIndex 的 `MetadataFilter`，但在数据库层面执行 | W4D1 |
+| `where={"$and": [...]}` | 组合条件，也支持 `$or`、`$in`、`$gte` 等操作符 | W4D1 |
+| 过滤 vs 检索顺序 | ChromaDB 先过滤再检索，比"先搜出来再筛"更高效 | W4D1 |
+
+### 增删改
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| `collection.update(ids=[...])` | 按 ID 更新文档内容和元数据 | W4D1 |
+| `collection.delete(ids=[...])` | 按 ID 删除文档 | W4D1 |
+| `collection.upsert()` | 存在就更新，不存在就插入——一条命令覆盖两种场景 | W4D1 |
+
+### ChromaDB + LlamaIndex 集成
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| `ChromaVectorStore(chroma_collection=collection)` | 把 ChromaDB Collection 包装成 LlamaIndex 认识的 VectorStore | W4D1 |
+| `StorageContext.from_defaults(vector_store=...)` | 告诉 LlamaIndex"向量存在 ChromaDB 里"——存储层可插拔的关键 | W4D1 |
+| `VectorStoreIndex.from_documents(docs, storage_context=...)` | 建索引时自动把向量写入 ChromaDB，和本地存储建索引写法完全一样 | W4D1 |
+| `index.storage_context.persist()` | 只存索引元数据（Node 结构等），向量由 ChromaDB 自己管理 | W4D1 |
+| `load_index_from_storage(storage_context=...)` | 恢复索引：向量从 ChromaDB 读 + 元数据从磁盘读，不需要重新 embedding | W4D1 |
+
+### ChromaDB vs SimpleVectorStore 对比
+
+| 维度 | SimpleVectorStore (W3) | ChromaDB (W4) |
+|------|------------------------|---------------|
+| 存储格式 | JSON + .bin 文件 | SQLite + Parquet（数据库引擎） |
+| 加载方式 | 全量加载到内存 | 按需读取，有索引加速 |
+| 适合文档量 | < 1000 | 1000 ~ 百万级 |
+| 并发查询 | 不支持 | 支持多客户端同时查 |
+| 增量写入 | 需要 full rebuild | 直接 add，实时可见 |
+| 生产环境 | 不适合 | 适合小中型项目 |
+
+- 面试金句：SimpleVectorStore 适合原型验证，文档量上千或需增量更新时切换到 ChromaDB。切换成本很低——LlamaIndex 的 VectorStore 抽象层让换存储引擎只需改几行代码。
+
+### 踩坑
+
+| 问题 | 原因 | 解决 | 日期 |
+|------|------|------|------|
+| `UnicodeEncodeError: 'gbk' codec` | Windows 终端默认 GBK 编码，无法打印 emoji | 避免在 print 中用 emoji（如 `✅`） | W4D1 |
+| ChromaDB 默认嵌入模型下载极慢 | `all-MiniLM-L6-v2` 从 AWS S3 下载 80MB，国内很慢 | 用 `SentenceTransformerEmbeddingFunction` 指向 ModelScope 缓存的中文模型 | W4D1 |
+| `OpenAI` (新) 校验模型名白名单 | LlamaIndex 0.14+ 的 `llama_index.llms.openai.OpenAI` 只认 OpenAI 官方模型名 | 用 `llama_index.llms.openai_like.OpenAILike`（需单独 `pip install llama-index-llms-openai-like`），不校验模型名 | W4D1 |
+| `load_index_from_storage()` 报找不到索引 | 只传 vector_store 不够，还需 persist_dir 指定元数据位置 | 先 `index.storage_context.persist(persist_dir=...)`，再加载时传 `StorageContext.from_defaults(vector_store=..., persist_dir=...)` | W4D1 |
+
+### SimpleVectorStore → ChromaDB 迁移实战（W4D2）
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| 迁移改什么 | 改三处：建索引时加 ChromaDB client/collection/ChromaVectorStore；加载时先连 ChromaDB 再 load_index_from_storage；其余代码（分块/嵌入/LLM/chat_engine/过滤）完全不变 | W4D2 |
+| build once, load many | build_index.py 建库（一次性，`create_collection` + `VectorStoreIndex` + `persist`），app.py 每次启动只加载（`get_collection` + `load_index_from_storage` | W4D2 |
+| 两次持久化 | ChromaDB 自动存向量（SQLite），LlamaIndex 的 `persist()` 只存元数据（docstore/index_store）——两者各管各的，加载时两个都要 | W4D2 |
+| Collection 名称一致性 | build 的 `create_collection(name="xxx")` 和 app 的 `get_collection("xxx")` 必须同名 | W4D2 |
+| metadata 值一致性 | build_index 写入的 metadata category 值和 app 过滤用的值必须完全一致，否则品类筛选无结果 | W4D2 |
+| 品类切换 = 新会话 | 切换品类时重建 chat_engine 会清空 chat_history，上下文丢失。这是当前设计的 trade-off | W4D2 |
+
+| 问题 | 原因 | 解决 | 日期 |
+|------|------|------|------|
+| `VectorStoreIndex()` 无赋值 | 创建了 index 但没赋给变量，下一行调 `index.xxx` 报 NameError | `index = VectorStoreIndex(...)` | W4D2 |
+| 变量名 typo（cilent/client） | 拼写错误不报语法错，运行时才炸 NameError | 仔细检查变量名 | W4D2 |
+| `MetadataFilter` vs `MetadataFilters` | 单数是过滤条，复数是装多条规则的容器 | 单条用 `MetadataFilter`，多条用 `MetadataFilters(filters=[...])` | W4D2 |
+| W4 venv 缺 streamlit | Day 1 只用 ChromaDB 不需要 streamlit，Day 2 新增依赖 | `pip install streamlit` | W4D2 |
+
+---
+
 ## [[踩坑记录]]
 
 | 问题                            | 原因                                                            | 解决                                                               | 日期   |

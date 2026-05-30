@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>BOSS导出书签</title></head>
+<body>
+  <h3>把下面按钮拖到浏览器书签栏</h3>
+  <a id="bm" href="" style="font-size:24px;padding:12px 24px;background:#00c091;color:white;text-decoration:none;border-radius:6px;display:inline-block;">
+    📦 导出BOSS岗位
+  </a>
+  <p style="margin-top:20px;color:#666;">拖不动？右键 → 复制链接 → 手动新建书签粘贴</p>
+  <script>
+    var code = document.querySelector('script[data-code]').getAttribute('data-code');
+    document.getElementById('bm').href = 'javascript:' + code;
+  </script>
+  <script data-code="(function(){function normalize(s){return(s||'').replace(/[（(].*?[)）]/g,'').replace(/[\s\-_·•]/g,'').toLowerCase();}function extractJob(card){var getText=function(sel){var el=card.querySelector(sel);return el?el.textContent.trim():'';};var nameEl=card.querySelector('a[ka^=search_list_]')||card.querySelector('.job-name a,.job-title a,[class*=job-name] a,[class*=job-title] a');var linkEl=nameEl||card.querySelector('a[href*=/job_detail/]');var companyEl=card.querySelector('.company-name a,.company-text a,[class*=company-name] a,[class*=company] a');var link=linkEl?linkEl.href:'';var jobId=link.match(/job_detail\/([a-zA-Z0-9]+)\.html/)?.[1]||link;var tags=Array.from(card.querySelectorAll('.tag-list li,.job-tag,[class*=tag] span,.experience,.degree')).map(function(t){return t.textContent.trim();}).filter(Boolean);var jobName=nameEl?nameEl.textContent.trim():getText('.job-name,.job-title,[class*=job-name],[class*=job-title]');var companyName=companyEl?companyEl.textContent.trim():getText('.company-name,[class*=company-name]');return{id:jobId,name:jobName,salary:getText('.salary,[class*=salary],[class*=red]'),company:companyName,location:tags.find(function(t){return t.includes('区')||t.includes('街道');})||'',tags:tags.join(' / '),link:link,dedupKey:normalize(companyName)+'|||'+normalize(jobName)};}var exported=new Set(JSON.parse(localStorage.getItem('boss_exported_jobs')||'[]'));var exportedKeys=new Set(JSON.parse(localStorage.getItem('boss_exported_keys')||'[]'));var cards=document.querySelectorAll('li.job-card-box,div.job-card-body,[class*=job-card]');var jobs=[];var seenLink=new Set();var seenKey=new Set();cards.forEach(function(card){var job=extractJob(card);if(!job.link)return;if(seenLink.has(job.link))return;seenLink.add(job.link);if(seenKey.has(job.dedupKey))return;seenKey.add(job.dedupKey);if(exported.has(job.id)||exportedKeys.has(job.dedupKey))return;exported.add(job.id);exportedKeys.add(job.dedupKey);jobs.push(job);});localStorage.setItem('boss_exported_jobs',JSON.stringify([...exported]));localStorage.setItem('boss_exported_keys',JSON.stringify([...exportedKeys]));if(jobs.length===0){alert('[BOSS导出] 没有新岗位。已累计 '+exported.size+' 条不重复记录。重置：在地址栏粘贴 javascript:localStorage.removeItem(\"boss_exported_jobs\");localStorage.removeItem(\"boss_exported_keys\");void(0)');return;}var headers=['岗位名称','公司','薪资','地点','标签','链接'];var rows=jobs.map(function(j){return[j.name,j.company,j.salary,j.location,j.tags,j.link].map(function(v){return '\"'+ (v||'').replace(/\"/g,'\"\"')+'\"';}).join(',');});var csv='﻿'+headers.join(',')+'\n'+rows.join('\n');var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='boss_jobs_'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(url);alert('[BOSS导出] 新增 '+jobs.length+' 个，累计 '+exported.size+' 个不重复岗位');})();void(0);" type="text/javascript">
+</script>
+</body>
+</html>
