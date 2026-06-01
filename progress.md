@@ -4,7 +4,7 @@ tags:
   - ai-learning
   - weekly-log
 created: 2026-05-21
-updated: 2026-05-26
+updated: 2026-06-01
 ---
 
 # AI 应用开发学习进度
@@ -12,10 +12,10 @@ updated: 2026-05-26
 ## 当前状态
 - **当前周：** W4（Day 4 完成）
 - **开始日期：** 2026-05-21
-- **今日日期：** 2026-05-29
-- **今日工作时长：** 4h
-- **累计工作时长：** 38h
-- **状态：** 🟢 W4 Day 4 完成
+- **今日日期：** 2026-06-01
+- **今日工作时长：** 3h
+- **累计工作时长：** 41h
+- **状态：** 🟢 W4 Day 5 完成
 - **特殊：** MiMo-V2.5-Pro Token Plan 激活（5/23 → 6/23），已接入 Codex Desktop
 - **兴趣线：** 游戏开发（业余，入职前不主动投入时间）→ 计划见 `[[game-dev-track]]`
 
@@ -31,12 +31,12 @@ updated: 2026-05-26
 - ✅ Day 3 完成：4 模型对决 — 多客户端架构（provider 路由）、直连 MiMo Token Plan 端点（免代理）、千问 DashScope 接入、三组任务实测对比（数学推理/代码/翻译）
 - ✅ Day 4 完成：DS vs Qwen 深度对比分析 — 6 条系统化 prompt 覆盖 4 维度、量化差异数据（Token 3.3x / 延迟 6.7x / 正确率相同）、产出面试对比文档 model-comparison.md
 
-- ✅ Day 4 完成：Prompt 标准化实战 — battle.py 接入五段法模板系统 + 3 条固定测试
-- ✅ Day 3 完成：Prompt Engineering 进阶 — 结构化五段法（System/Context/Instruction/Examples/Constraints）+ 裸奔 vs 一句话 vs 五段法实测对比
-
 ## W4 进度（W4 — RAG 进阶：向量数据库）
 - ✅ Day 1 完成：ChromaDB 入门 — 核心概念（Client/Collection/Embedding Function）、语义搜索 + 元数据过滤、CRUD、持久化、ChromaDB + LlamaIndex 集成（ChromaVectorStore/StorageContext）
 - ✅ Day 2 完成：ChromaDB 应用实战 — 将 W3 Day 7 电商客服从 SimpleVectorStore 迁移到 ChromaDB，拆分 build_index.py + app.py，验证语义检索、品类过滤、流式对话、上下文记忆
+- ✅ Day 3 完成：Prompt Engineering 进阶 — 结构化五段法 + 裸奔 vs 一句话 vs 五段法实测对比
+- ✅ Day 4 完成：固定测试集 — 3 条场景测试 + check_contains 关键词检查
+- ✅ Day 5 完成：Agent Loop 手写 — 纯 API tools 参数实现 Agent 循环 + 练习添加新工具（get_word_length）
 
 ## 遇到的困难
 - ChromaDB 默认英文嵌入模型 all-MiniLM-L6-v2 从 AWS S3 下载极慢（80MB，国内网络） → 改用 ModelScope 缓存的 BGE 中文模型本地路径
@@ -60,9 +60,12 @@ updated: 2026-05-26
 - Day 2: metadata category 不一致（build_index 写"产品介绍"但 app 过滤"产品"）→ 品类筛选无结果（已理解：两端值必须完全一致）
 - Day 2: 品类切换重建 chat_engine → 上下文丢失（已理解：切换品类 = 新会话，是当前设计的 trade-off）
 - Day 2: W4 venv 缺 streamlit → ModuleNotFoundError（已解决：`pip install streamlit`）
+- Day 5: 函数基础不牢 — 不熟悉参数声明、返回值 vs print、类型标注的写法（已理解：函数体内用到的变量必须在括号里声明；return 传值，print 输出）
+- Day 5: JSON 概念模糊 — 不理解 loads/dumps 的用途（已理解：JSON 是跨语言传数据的中间格式，本质是"像字典的字符串"）
+- Day 5: `**dict` 字典展开不理解 — 不知道参数怎么动态传入函数（已理解：`func(**{k: v})` = `func(k=v)`）
 
 ## 明日计划
-- W4 Day 5：Agent Loop 手写 — 不用任何框架，用纯 `OpenAI().chat.completions.create()` 写 Agent 循环（≤100 行）
+- W4 Day 6：待定（巩固函数基础 + Agent Loop 加深）
 
 ## 已完成的产出
 | 周 | 产出 | 链接 |
@@ -85,6 +88,7 @@ updated: 2026-05-26
 | W4 | day3_prompt_engineering.py（Prompt Engineering 五段法 — 裸奔 vs 一句话 vs 结构化实测对比） | projects/w4-chromadb/day3_prompt_engineering.py |
 | W4 | battle.py（升级版 — 接入五段法模板系统 + selectbox 切换 + text_area 可编辑） | projects/w2-model-battle/battle.py |
 | W4 | day4_test_cases.py（固定测试集 — 3 条场景测试 + check_contains 关键词检查） | projects/w4-chromadb/day4_test_cases.py |
+| W4 | day5_agent_loop.py（Agent Loop 手写 — 纯 API tools 参数 + 3 工具 + 手动添加 get_word_length 练习） | projects/w4-chromadb/day5_agent_loop.py |
 
 ## 收入记录
 | 日期 | 来源 | 金额 |

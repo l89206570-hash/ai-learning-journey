@@ -7,7 +7,7 @@ tags:
   - rag
   - streamlit
 created: 2026-05-21
-updated: 2026-05-25
+updated: 2026-06-01
 ---
 
 # 知识点存档
@@ -23,8 +23,22 @@ updated: 2026-05-25
 | 概念 | 要点 | 来源 |
 |------|------|------|
 | `def` 定义函数 | `def` 是注册名字，不是执行；定义在前，调用在后 | W1D1 |
+| 参数 vs 实参 | 括号里声明的叫形参（parameter），调用时传的叫实参（argument） | W1D1 |
 | 参数类型标注 | `def func(name: str) -> str:` 标注入参和返回值类型 | W1D1 |
-| 返回值 | `return` 把数据传回给调用者 | W1D1 |
+| 返回值 | `return` 把数据传回给调用者；`print()` 只输出到屏幕，返回 `None` | W1D1 |
+| 无参函数 | `def f():` 不需要输入，括号留空 | W4D5 |
+| 有参函数 | `def f(word: str):` 需要输入，函数体内用到的变量必须在括号里声明 | W4D5 |
+| `**dict` 字典展开 | `func(**{"key": val})` 等价于 `func(key=val)`，动态传参用 | W4D5 |
+| 函数签名规则 | 函数体内出现的每个变量，要么来自参数，要么在函数内部创建 | W4D5 |
+
+### JSON
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| JSON 本质 | 跨语言传数据的通用格式，本质是"长得像 Python 字典的字符串" | W4D5 |
+| `json.loads()` | JSON 字符串 → Python 字典 | W4D5 |
+| `json.dumps()` | Python 字典 → JSON 字符串 | W4D5 |
+| 为什么需要 JSON | Python 和 API 服务器用不同语言，JSON 是中间格式 | W4D5 |
 
 ### 异常处理
 
@@ -62,6 +76,8 @@ updated: 2026-05-25
 | `list[::-1]` | 列表切片倒序，返回新拷贝的列表，会多占一份内存 | W2D1 |
 | `continue` | 跳过本轮循环，进入下一轮 | W1D2 |
 | `if/elif/else` | 多条件分支判断 | W1D1 |
+| `for ... range(n)` | 固定次数循环，自动兜底防死循环，适合批处理 | W4D5 |
+| `while` 循环 | 条件循环，`while True` 靠内部 `return`/`break` 退出，适合不确定次数的情况 | W4D5 |
 
 ### 数据结构
 
@@ -619,6 +635,49 @@ updated: 2026-05-25
 | 变量名 typo（cilent/client） | 拼写错误不报语法错，运行时才炸 NameError | 仔细检查变量名 | W4D2 |
 | `MetadataFilter` vs `MetadataFilters` | 单数是过滤条，复数是装多条规则的容器 | 单条用 `MetadataFilter`，多条用 `MetadataFilters(filters=[...])` | W4D2 |
 | W4 venv 缺 streamlit | Day 1 只用 ChromaDB 不需要 streamlit，Day 2 新增依赖 | `pip install streamlit` | W4D2 |
+
+---
+
+## [[Agent Loop]]（W4D5）
+
+> 不用任何框架，纯 OpenAI API 的 `tools` 参数实现 Agent 循环。
+
+### 核心概念
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| Agent Loop | LLM 反复调工具直到能回答用户的循环：调 API → 判断 → 执行工具/返回答案 | W4D5 |
+| ReAct 模式 | Reasoning + Acting，LLM 先思考要不要用工具，再用工具，再看结果 | W4D5 |
+| `tools=` 参数 | `chat.completions.create(tools=TOOLS)` 告诉 LLM 有哪些工具可用 | W4D5 |
+| `msg.tool_calls` | LLM 返回工具调用请求时用这个字段判断，非 `None` 表示要调工具 | W4D5 |
+| TOOLS 结构 | `{"type": "function", "function": {"name": "...", "parameters": {...}}}` | W4D5 |
+| TOOL_MAP | 工具名字符串 → 实际 Python 函数的映射字典，循环里动态调用 | W4D5 |
+
+### 循环流程
+
+```
+用户提问 → messages = [system, user]
+  ↓
+for turn in range(max_turns):
+  ├─ 调 API（带 tools=TOOLS）
+  ├─ 如果 msg.tool_calls：
+  │    ├─ 取 tool_name + tool_args
+  │    ├─ TOOL_MAP[tool_name](**tool_args) 执行
+  │    ├─ messages 追加 assistant(tool_calls) + tool(result)
+  │    └─ 继续循环
+  └─ 如果没有 tool_calls：
+       └─ 返回 msg.content（最终答案）
+```
+
+### 踩坑
+
+| 问题 | 原因 | 解决 |
+|------|------|------|
+| 函数体用 `word` 但声明里没写参数 | 函数体内用到的变量必须在括号里声明 | `def f(word: str):` |
+| `return print(...)` | `print()` 返回 `None`，只有输出没有传值 | 要传值用 `return`，要显示用 `print` |
+| TOOLS 里函数名抄错 | 复制粘贴没改干净 | 复制完逐项检查关键字段 |
+| `properties` 拼成 `properyies` | 手滑 | 跑一下就能发现 SyntaxError |
+| `len(str)` 不是 `len(word)` | `str` 是内置类型名，不是你的变量 | 变量名是你起的，别和内置名冲突 |
 
 ---
 
