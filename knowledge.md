@@ -7,7 +7,7 @@ tags:
   - rag
   - streamlit
 created: 2026-05-21
-updated: 2026-06-01
+updated: 2026-06-03
 ---
 
 # 知识点存档
@@ -17,6 +17,22 @@ updated: 2026-06-01
 ---
 
 ## [[Python 基础]]
+
+### 基础符号速查
+
+| 符号 | 作用 | 易错点 |
+|------|------|--------|
+| `=` | 赋值，把右边放进左边 | 和 `==` 混淆——`=` 不是"相等" |
+| `==` | 比较，相等返回 `True` | `if n%2 = 0` 报错，该用 `==` |
+| `:` | 开启代码块（if/for/def 后），字典键值对 `{"k": v}`，切片 `[1:3]` | if 后面漏写 → `SyntaxError` |
+| `()` | 函数调用 `len(x)`，元组 `(1,2)`，运算优先级 `(1+2)*3` | 调函数用 `()` 不是 `{}` |
+| `[]` | 列表 `[1,2]`，索引取值 `lst[0]`，列表推导式 `[x for x in lst]` | 推导式外面要套 `[]` |
+| `{}` | 字典 `{"k": v}`，集合 `{1,2}`，f-string 插值 `f"{x}"` | `return` 不是函数，返回字典用 `return {}` |
+| `,` | 分隔参数/元素，单元素元组必须用它 | `(1)` 是数字，`(1,)` 才是元组 |
+| `.` | 对象调属性/方法：`"hi".upper()` | 方法是 `text.isupper()` 不是 `isupper{text}` |
+| `"` / `'` | 字符串，嵌套时交替避免冲突 | f-string 内 `\"` 转义 |
+| `#` | 注释，后面内容不执行 | |
+| `f` 前缀 | f-string：`f"{变量}"` 把变量值嵌入字符串 | 忘了 `f` → `{name}` 原样输出 |
 
 ### 函数
 
@@ -30,6 +46,8 @@ updated: 2026-06-01
 | 有参函数 | `def f(word: str):` 需要输入，函数体内用到的变量必须在括号里声明 | W4D5 |
 | `**dict` 字典展开 | `func(**{"key": val})` 等价于 `func(key=val)`，动态传参用 | W4D5 |
 | 函数签名规则 | 函数体内出现的每个变量，要么来自参数，要么在函数内部创建 | W4D5 |
+| 嵌套函数 | 在函数内部定义函数，内部函数只在外部函数内可见。`def outer(): def inner(): ...` | F1练习 |
+| 返回值 | `return` 后面接的是"算完的结果"——可以是值、变量、表达式、函数调用结果、容器、f-string | F1练习 |
 
 ### JSON
 
@@ -65,6 +83,7 @@ updated: 2026-06-01
 | `.rstrip()` | 只去掉右侧空白；`.rstrip("\n")` 精确去掉换行符 | W1D2 |
 | `.startswith()` | 检查字符串是否以指定内容开头，比 `in` 更精确 | W1D2 |
 | `f-string` | `f"{变量} 文字"` 格式化字符串 | W1D1 |
+| f-string 进阶 | `{ }` 里可放表达式（运算、函数调用、字典取值），支持格式化（`.2f` 保留小数、`,.1f` 千分位）、对齐填充（`<` 左对齐、`>` 右对齐、`^` 居中） | F1练习 |
 
 ### 循环与条件
 
@@ -83,8 +102,11 @@ updated: 2026-06-01
 
 | 概念 | 要点 | 来源 |
 |------|------|------|
-| 列表 `[]` | 有序集合，`list[i]` 按下标访问 | W1D1 |
+| 列表 `[]` | 有序集合，`list[i]` 按下标访问，可增删改 | W1D1 |
 | 字典 `{}` | 键值对集合，`dict["key"]` 访问 | W1D2 |
+| 元组 `()` | 不可变列表——创建后不能增删改。单元素必须加逗号 `(1,)` 否则被当数字。能做字典键（列表不行） | F1练习 |
+| `()` vs `[]` vs `{}` | `()` 函数调用+元组，`[]` 列表+索引取值，`{}` 字典+集合+f-string插值。碰函数用 `()`，构造容器认准各自括号 | F1练习 |
+| 列表推导式 | `[对元素做什么 for 元素 in 原列表]` 一行生成新列表。本质是 for 循环的简写版 | F1练习 |
 
 ### 模块与入口
 
@@ -681,6 +703,56 @@ for turn in range(max_turns):
 
 ---
 
+## [[Agent Chat 交互界面]]（W4D6）
+
+> 把命令行 Agent Loop 升级成 Streamlit 聊天界面，学习 yield 生成器 + 新 UI 组件。
+
+### 新概念
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| `yield` 生成器 | 函数可以多次返回值，每次 yield 后暂停，下次从暂停处继续；return 只返回一次 | W4D6 |
+| `st.chat_message()` | 聊天气泡组件，把消息内容圈在一个聊天气泡里显示 | W4D6 |
+| `st.chat_input()` | 底部聊天输入框，回车发送，返回用户输入的字符串 | W4D6 |
+| `st.status()` | 可展开的状态框，用 `with` 创建，`st.write` 往里写内容，`status.update` 改标题和状态 | W4D6 |
+| `pass` 占位符 | Python 要求缩进块至少一行代码，`pass` 什么都不做，纯粹占位，以后替换成真正代码 | W4D6 |
+| 多轮对话记忆 | `for m in st.session_state.messages: messages.append(m)` 把历史对话传给 LLM，让它知道"刚才聊了什么" | W4D6 |
+
+### JSON Schema 工具定义结构
+
+```
+TOOLS = [
+    {
+        "type": "function",           # 固定写法
+        "function": {
+            "name": "工具名",          # LLM 通过名字识别工具
+            "description": "用途说明",  # LLM 据此判断何时调用
+            "parameters": {
+                "type": "object",      # 固定 "object"
+                "properties": {        # {} 对象，每项有参数名
+                    "参数名": {
+                        "type": "string",
+                        "description": "参数说明"
+                    }
+                },
+                "required": ["参数名"]  # [] 数组，列出必填参数
+            }
+        }
+    }
+]
+```
+
+| 符号 | 含义 | 例子 |
+|------|------|------|
+| `{}` | 对象/字典（键值对，每项有名字） | `properties: {}` — 参数定义 |
+| `[]` | 数组/列表（按顺序排列） | `required: []` — 必填参数名列表 |
+
+### TOOL_MAP 的作用
+
+Agent 收到的是工具名**字符串**（如 `"calculate"`），不能直接 `"calculate"(args)` 调用。TOOL_MAP 是字符串→函数的桥梁：`TOOL_MAP["calculate"]` 拿到函数对象后才能执行 `func(**args)`。
+
+---
+
 ## [[踩坑记录]]
 
 | 问题                            | 原因                                                            | 解决                                                               | 日期   |
@@ -715,3 +787,43 @@ for turn in range(max_turns):
 | `for msg,` 多余逗号               | `for msg, in list` 被 Python 解析为元组解包，ChatMessage 对象不可迭代 | 去掉末尾逗号：`for msg in list` | W3D7 |
 | ChatMessage 当成 dict 用          | `msg["role"]` 访问 ChatMessage 对象，但它是对象不是字典 | 用 `msg.role.value` 和 `msg.content` 属性访问 | W3D7 |
 | source_nodes 层级混淆             | `node.metadata` 直接取——`source_nodes` 返回的是 `NodeWithScore` 列表，metadata 在 `node.node.metadata` 里 | 用 `node.node.metadata` 取元数据 | W3D7 |
+| `print` 当 `return` 用          | 函数用 `print()` 输出却期望拿到返回值，`print` 只显示在屏幕上，函数实际返回 `None` | 用 `return` 把值交出去 | F1练习 |
+| 括号混用（`{}` 调函数）              | `len{text}`、`isupper{text}` 用花括号调函数 | 函数和方法一律用 `()`：`len(text)`、`isupper()` | F1练习 |
+| 变量名混淆                        | `def calc(p): return prices*0.8` 内部用外层列表变量而非参数 | 函数体内用自己参数名 `p` 而非外层变量 `prices` | F1练习 |
+| 中文标点 vs 英文标点                | `f"你好，{name}!"` 用英文 `!`，测试期望中文 `！` | 字符串内容注意中英文标点一致 | F1练习 |
+| `chromadb` 与 `sentence-transformers` 版本不兼容 | `chromadb 1.5.9` + `sentence-transformers 5.5.1` → `RustBindingsAPI` 报错 | 降级 `sentence-transformers==3.0.1` | W4D7 |
+| ChromaDB collection embedding 不一致 | 建库没用 BGE，查库指定 BGE → `ValueError: embedding function conflict` | 重建 collection 统一 embedding function | W4D7 |
+
+---
+
+## [[Agent + ChromaDB 集成]]（W4D7）
+
+> 将 ChromaDB 知识库作为 Agent 的工具，实现自主检索 + 回答。
+
+### 核心架构
+
+```
+用户问题 → Agent Loop（LLM + tools）
+                │
+                ├─ search_knowledge_base(query)  ← 查 ChromaDB
+                ├─ calculate(expression)          ← 计算
+                ├─ get_current_time()             ← 获取时间
+                └─ 不需要工具 → 直接回答
+```
+
+### 关键认知
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| 工具函数就是普通 Python 函数 | `search_knowledge_base` 内部调 `collection.query()`，和 Day 5 的 mock `search_knowledge` 结构完全一样，只是数据源从 dict 换成了 ChromaDB | W4D7 |
+| Agent 不关心工具内部实现 | LLM 只知道工具名 + description + 参数，不关心你查的是 dict 还是 ChromaDB 还是 API——可替换性 | W4D7 |
+| embedding function 必须一致 | 建库时用的什么嵌入模型，查询时也必须用同一个，否则向量维度/语义空间对不上 | W4D7 |
+| 不用 LlamaIndex 也能查 ChromaDB | 直接用 `collection.query(query_texts=[...])` 绕过 LlamaIndex，适合 Agent 这种轻量场景 | W4D7 |
+
+### 与 Day 5/6 的区别
+
+| | Day 5/6 | Day 7 |
+|------|---------|-------|
+| 知识库 | Python dict 硬编码 | ChromaDB 持久化存储 |
+| 检索方式 | `if key in query_lower` 关键词匹配 | `collection.query()` 语义检索 |
+| 可扩展性 | 加知识要改代码 | 直接 `collection.add()` |

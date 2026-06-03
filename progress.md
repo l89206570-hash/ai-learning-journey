@@ -4,18 +4,18 @@ tags:
   - ai-learning
   - weekly-log
 created: 2026-05-21
-updated: 2026-06-01
+updated: 2026-06-02
 ---
 
 # AI 应用开发学习进度
 
 ## 当前状态
-- **当前周：** W4（Day 4 完成）
+- **当前周：** W4（Day 7 完成）
 - **开始日期：** 2026-05-21
-- **今日日期：** 2026-06-01
-- **今日工作时长：** 3h
-- **累计工作时长：** 41h
-- **状态：** 🟢 W4 Day 5 完成
+- **今日日期：** 2026-06-03
+- **今日工作时长：** 2h
+- **累计工作时长：** 43h
+- **状态：** 🟢 W4 Day 7 完成
 - **特殊：** MiMo-V2.5-Pro Token Plan 激活（5/23 → 6/23），已接入 Codex Desktop
 - **兴趣线：** 游戏开发（业余，入职前不主动投入时间）→ 计划见 `[[game-dev-track]]`
 
@@ -37,6 +37,8 @@ updated: 2026-06-01
 - ✅ Day 3 完成：Prompt Engineering 进阶 — 结构化五段法 + 裸奔 vs 一句话 vs 五段法实测对比
 - ✅ Day 4 完成：固定测试集 — 3 条场景测试 + check_contains 关键词检查
 - ✅ Day 5 完成：Agent Loop 手写 — 纯 API tools 参数实现 Agent 循环 + 练习添加新工具（get_word_length）
+- ✅ Day 6 完成：Agent Chat 交互界面 — 命令行升级 Streamlit + yield 生成器 + st.chat_message/chat_input/status + 多轮对话记忆
+- ✅ Day 7 完成：综合练习 — Agent + ChromaDB 自主搜索助手，Agent 自己判断是否检索知识库、调工具、组织回答
 
 ## 遇到的困难
 - ChromaDB 默认英文嵌入模型 all-MiniLM-L6-v2 从 AWS S3 下载极慢（80MB，国内网络） → 改用 ModelScope 缓存的 BGE 中文模型本地路径
@@ -63,9 +65,13 @@ updated: 2026-06-01
 - Day 5: 函数基础不牢 — 不熟悉参数声明、返回值 vs print、类型标注的写法（已理解：函数体内用到的变量必须在括号里声明；return 传值，print 输出）
 - Day 5: JSON 概念模糊 — 不理解 loads/dumps 的用途（已理解：JSON 是跨语言传数据的中间格式，本质是"像字典的字符串"）
 - Day 5: `**dict` 字典展开不理解 — 不知道参数怎么动态传入函数（已理解：`func(**{k: v})` = `func(k=v)`）
+- Day 6: `properties` 拼成 `parmaters` / `parmters` → API 不识别工具定义（已理解：JSON Schema 字段名必须精确）
+- Day 6: `{}` vs `[]` 混淆 — properties 用 `{}`（对象/键值对），required 用 `[]`（数组/列表）
+- Day 6: TOOL_MAP 字典里用 `=` 代替 `:` → SyntaxError（已理解：字典用 `:` 分隔键值对）
+- Day 6: 删掉 `pass` 后 for 循环体为空 → IndentationError（已理解：`pass` 是占位符，替换不是删除）
 
 ## 明日计划
-- W4 Day 6：待定（巩固函数基础 + Agent Loop 加深）
+- W5 开始：Agent 三范式 或 MCP 入门
 
 ## 已完成的产出
 | 周 | 产出 | 链接 |
@@ -89,6 +95,9 @@ updated: 2026-06-01
 | W4 | battle.py（升级版 — 接入五段法模板系统 + selectbox 切换 + text_area 可编辑） | projects/w2-model-battle/battle.py |
 | W4 | day4_test_cases.py（固定测试集 — 3 条场景测试 + check_contains 关键词检查） | projects/w4-chromadb/day4_test_cases.py |
 | W4 | day5_agent_loop.py（Agent Loop 手写 — 纯 API tools 参数 + 3 工具 + 手动添加 get_word_length 练习） | projects/w4-chromadb/day5_agent_loop.py |
+| W4 | warmup_4.py（W4D6 暖身 — 函数/JSON/**dict 综合练习） | projects/exercises/warmup_4.py |
+| W4 | day6_agent_chat.py（Agent Chat Streamlit 界面 — yield 生成器 + st.chat_message/chat_input/status + 多轮记忆） | projects/w4-chromadb/day6_agent_chat.py |
+| W4 | day7_agent_search.py（综合练习 — Agent + ChromaDB 自主搜索，3 工具 + 语义检索 + Streamlit 界面） | projects/w4-chromadb/day7_agent_search.py |
 
 ## 收入记录
 | 日期 | 来源 | 金额 |
