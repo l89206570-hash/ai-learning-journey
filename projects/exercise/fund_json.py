@@ -9,7 +9,7 @@ import json
 #    提示：json.dumps(d, ensure_ascii=False)
 # ----------------------------------------------------------
 def to_json(d):
-    pass
+    return json.dumps(d, ensure_ascii=False)
 
 
 # ----------------------------------------------------------
@@ -17,7 +17,7 @@ def to_json(d):
 #    提示：json.loads(s)
 # ----------------------------------------------------------
 def from_json(s):
-    pass
+    return json.loads(s)
 
 
 # ----------------------------------------------------------
@@ -25,7 +25,8 @@ def from_json(s):
 #    提示：json.dump(d, f, ensure_ascii=False, indent=2)
 # ----------------------------------------------------------
 def save_json(d, filepath):
-    pass
+    with open(filepath, "w") as f:
+        return json.dump(d,f, ensure_ascii=False, indent=2)
 
 
 # ----------------------------------------------------------
@@ -33,7 +34,8 @@ def save_json(d, filepath):
 #    提示：json.load(f)
 # ----------------------------------------------------------
 def load_json(filepath):
-    pass
+    with open(filepath, "r") as f:    
+        return json.load(f)
 
 
 # ----------------------------------------------------------
@@ -42,7 +44,9 @@ def load_json(filepath):
 #    例：wrap_response([1,2,3]) → '{"status":"ok","data":[1,2,3],"count":3}'
 # ----------------------------------------------------------
 def wrap_response(items):
-    pass
+    result = {"status":"ok", "data":items, "count":len(items)}
+    return json.dumps(result)
+
 
 
 # ----------------------------------------------------------
@@ -52,7 +56,10 @@ def wrap_response(items):
 #    提示：先 json.loads，再取 name 和 args 两个字段
 # ----------------------------------------------------------
 def parse_tool_call(tool_call_json):
-    pass
+    change = json.loads(tool_call_json)
+    result = (change.get("name"), change.get("args"))
+    return result
+    
 
 
 # ============================================================

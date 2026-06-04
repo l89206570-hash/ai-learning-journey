@@ -7,7 +7,8 @@
 #    提示：dict.get(key, default)
 # ----------------------------------------------------------
 def safe_get(d, key, default=None):
-    pass
+    result = d.get(key, default)
+    return result
 
 
 # ----------------------------------------------------------
@@ -15,7 +16,7 @@ def safe_get(d, key, default=None):
 #    提示：{**a, **b}
 # ----------------------------------------------------------
 def merge_dicts(a, b):
-    pass
+    return {**a, **b}
 
 
 # ----------------------------------------------------------
@@ -23,15 +24,18 @@ def merge_dicts(a, b):
 #    例：count_items(["a","b","a"]) → {"a": 2, "b": 1}
 # ----------------------------------------------------------
 def count_items(items):
-    pass
-
+    result = {}
+    for item in items:
+        result[item]= result.get(item, 0) + 1
+    return result
 
 # ----------------------------------------------------------
 # 4. 取列表中前 N 个元素
 #    提示：切片 lst[:n]
 # ----------------------------------------------------------
 def first_n(lst, n):
-    pass
+    peice = lst[:n]
+    return peice
 
 
 # ----------------------------------------------------------
@@ -39,7 +43,8 @@ def first_n(lst, n):
 #    例：{"a": 1, "b": 2} → {1: "a", 2: "b"}
 # ----------------------------------------------------------
 def invert_dict(d):
-    pass
+    swap = {v : k for k, v in d.items() }
+    return swap
 
 
 # ----------------------------------------------------------
@@ -49,7 +54,10 @@ def invert_dict(d):
 #    提示：逐层深入 d[key]
 # ----------------------------------------------------------
 def get_nested(d, path):
-    pass
+    result = d
+    for key in path :
+        result= result[key]
+    return result
 
 
 # ----------------------------------------------------------
@@ -57,7 +65,8 @@ def get_nested(d, path):
 #    提示：sorted(d.items(), key=lambda x: x[1], reverse=True)
 # ----------------------------------------------------------
 def sort_by_value(d):
-    pass
+    sort = sorted(d.items(), key=lambda x: x[1], reverse=True)
+    return sort 
 
 
 # ============================================================

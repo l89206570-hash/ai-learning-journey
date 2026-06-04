@@ -4,20 +4,19 @@ tags:
   - ai-learning
   - weekly-log
 created: 2026-05-21
-updated: 2026-06-02
+updated: 2026-06-04
 ---
 
 # AI 应用开发学习进度
 
 ## 当前状态
-- **当前周：** W4（Day 7 完成）
+- **当前周：** W5（Day 1 完成）
 - **开始日期：** 2026-05-21
-- **今日日期：** 2026-06-03
-- **今日工作时长：** 2h
-- **累计工作时长：** 43h
-- **状态：** 🟢 W4 Day 7 完成
+- **今日日期：** 2026-06-04
+- **状态：** 🟢 W5 Day 1 完成
 - **特殊：** MiMo-V2.5-Pro Token Plan 激活（5/23 → 6/23），已接入 Codex Desktop
 - **兴趣线：** 游戏开发（业余，入职前不主动投入时间）→ 计划见 `[[game-dev-track]]`
+- **基础线：** F1-F3 全部完成（函数基础 / 数据结构操作 / JSON & 序列化）
 
 ## 本周进度（W1 — Python 速成）
 - ✅ Day 1 完成：API 调用、函数定义、try/except、for 循环、enumerate、空值过滤
@@ -70,8 +69,17 @@ updated: 2026-06-02
 - Day 6: TOOL_MAP 字典里用 `=` 代替 `:` → SyntaxError（已理解：字典用 `:` 分隔键值对）
 - Day 6: 删掉 `pass` 后 for 循环体为空 → IndentationError（已理解：`pass` 是占位符，替换不是删除）
 
+## W5 进度（W5 — Agent 工程化）
+- ✅ Day 1 完成：Agent 三范式对比 — ReAct / Plan-then-Execute（方式 B+C）/ Reflexion 纯 API 实现，同一任务对比三种范式差异
+
+## 遇到的困难（W5）
+- Day 1: `plan_text.count("步骤")` 多数了步数 → 计划文本说明文字也含"步骤"，导致多跑空轮次
+- Day 1: Reflexion 反思提示缩进错（放在 for 循环里面而不是两个 for 之间）→ 每轮 tool_call 后都触发反思
+- Day 1: 伪代码 `[...]` 和 `...` 当真实代码 → Python 不认，要用实际变量
+- Day 1: `response.choices[0].message` 拿了整个对象而不是 `.content` → 格式不对
+
 ## 明日计划
-- W5 开始：Agent 三范式 或 MCP 入门
+- W5 Day 2：MCP 入门 或 Agent Skills vs Tools 体系
 
 ## 已完成的产出
 | 周 | 产出 | 链接 |
@@ -98,6 +106,11 @@ updated: 2026-06-02
 | W4 | warmup_4.py（W4D6 暖身 — 函数/JSON/**dict 综合练习） | projects/exercises/warmup_4.py |
 | W4 | day6_agent_chat.py（Agent Chat Streamlit 界面 — yield 生成器 + st.chat_message/chat_input/status + 多轮记忆） | projects/w4-chromadb/day6_agent_chat.py |
 | W4 | day7_agent_search.py（综合练习 — Agent + ChromaDB 自主搜索，3 工具 + 语义检索 + Streamlit 界面） | projects/w4-chromadb/day7_agent_search.py |
+| F1 | fund_functions.py（函数基础 — def/参数/return/嵌套函数） | projects/exercise/fund_functions.py |
+| F2 | fund_data_structures.py（数据结构操作 — dict/list/嵌套取值/排序） | projects/exercise/fund_data_structures.py |
+| F3 | fund_json.py（JSON & 序列化 — dumps/loads/dump/load/API 模拟） | projects/exercise/fund_json.py |
+| W5 | day1_three_paradigms.py（Agent 三范式对比 — ReAct + Plan-Execute B/C + Reflexion） | projects/w5-agent-paradigms/day1_three_paradigms.py |
+| W5 | paradigm-comparison.md（三范式实测对比分析） | projects/w5-agent-paradigms/paradigm-comparison.md |
 
 ## 收入记录
 | 日期 | 来源 | 金额 |

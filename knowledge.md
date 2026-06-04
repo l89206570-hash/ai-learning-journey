@@ -7,7 +7,7 @@ tags:
   - rag
   - streamlit
 created: 2026-05-21
-updated: 2026-06-03
+updated: 2026-06-04
 ---
 
 # 知识点存档
@@ -827,3 +827,63 @@ Agent 收到的是工具名**字符串**（如 `"calculate"`），不能直接 `
 | 知识库 | Python dict 硬编码 | ChromaDB 持久化存储 |
 | 检索方式 | `if key in query_lower` 关键词匹配 | `collection.query()` 语义检索 |
 | 可扩展性 | 加知识要改代码 | 直接 `collection.add()` |
+
+---
+
+## [[Agent 三范式对比]]（W5D1）
+
+> 用同一个任务分别实现 ReAct、Plan-then-Execute、Reflexion，感受三种 Agent 设计思路的差异。
+
+### Q1：ReAct 的循环结构怎么写？谁决定下一步做什么？
+
+ReAct 的循环结构是 思考 → 行动 → 观察 → 思考 → 行动 → 观察 → 回答。response 调用 LLM 先思考，`msg.tool_calls` 非空就执行工具，为空就返回答案。
+
+代码本质：一个 `for turn in range(max_turns)` 循环 + `if/else` 分支。LLM 自己决定每一步做什么，代码只负责执行工具和传递结果。
+
+### Q2：Plan-then-Execute 和 ReAct 最核心的区别是什么？
+
+Plan-then-Execute 上来先**不调用工具**，只思考并生成路线图后再按路线图执行。ReAct 是思考并调用工具、再思考再调工具，一次一次直到循环结束。
+
+代码层面的两处关键差异：
+
+| 差异点 | ReAct | Plan-then-Execute |
+|--------|-------|-------------------|
+| 第一次 API 调用 | 带 `tools=TOOLS` | **不带 tools**，纯文本输出计划 |
+| 谁驱动循环 | LLM 的 `tool_calls` | 你的代码（逐步骤 push）或一句指令（方式 C） |
+
+### Q3：Plan-Execute 方式 B 和方式 C 各有什么优缺点？
+
+| | 方式 B（逐步骤执行） | 方式 C（一句话指令） |
+|------|------|------|
+| 控制方式 | `for step in range(1, count+1):` 代码逐步 push | 一句"请按计划执行"后 LLM 自主 |
+| 优势 | 过程透明，每步可控，代码说了算 | 简洁，LLM 有路线图后自主搜索 |
+| 劣势 | 过程太详细，输出冗余，步数可能不准 | LLM 可能跳过某些步骤或遗漏信息 |
+
+### Q4：Reflexion 的两轮循环是怎么衔接的？
+
+两轮循环是将第一轮循环得到的答案让大模型自己检查并补充。反思提示放在**两个 for 循环之间**（和 for 同级缩进，不在循环里面）：
+
+```
+第一个 for 循环 → break 出初步答案
+    ↓
+messages.append("请检查你的回答是否完整正确")
+    ↓
+第二个 for 循环 → 拿到改进后答案
+```
+
+### Q5：三种范式分别适合什么场景？
+
+| 范式 | 适合场景 | 例子 |
+|------|---------|------|
+| ReAct | 任务信息不确定，需要灵活探索 | "帮我在三个电商平台对比 iPhone 价格"（不知道查哪些平台、查到什么） |
+| Plan-then-Execute | 任务步骤明确、可预见 | "写一份周报：查本周代码提交 + 会议纪要 + 项目进度，然后汇总" |
+| Reflexion | 对答案质量要求高 | "帮我审核这段代码的安全性"（需要自查是否有遗漏的漏洞） |
+
+### 踩坑
+
+| 问题 | 原因 | 解决 |
+|------|------|------|
+| `plan_text.count("步骤")` 多数了步数 | 计划文本的说明文字里也含"步骤"，不是只有步骤标题 | 让 LLM 在计划末尾输出 `STEPS=N`，代码解析数字 |
+| 反思提示缩在第一个 for 循环里面 | 缩进错了，写在 `if/else` 同级而不是 for 同级 | 反思提示放在两个 for 之间，和 for 同级缩进 |
+| 反思提示里用了 `[...]` 和 `...` | 伪代码占位符被当成真实代码，Python 不认 | 用实际变量 `[tool_call.model_dump()]` 和 `tool_call.id` |
+| Plan-Execute 首次调 API 用了整个 msg 对象 | `plan_text = response.choices[0].message` 拿到的是对象不是文本 | 用 `.message.content` 取文本，`messages.append({"role":"assistant","content":plan_text})` |
