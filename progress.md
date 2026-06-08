@@ -4,16 +4,18 @@ tags:
   - ai-learning
   - weekly-log
 created: 2026-05-21
-updated: 2026-06-04
+updated: 2026-06-08
 ---
 
 # AI 应用开发学习进度
 
 ## 当前状态
-- **当前周：** W5（Day 1 完成）
+- **当前周：** 🟢 W5（Day 1-3 完成）
 - **开始日期：** 2026-05-21
-- **今日日期：** 2026-06-04
-- **状态：** 🟢 W5 Day 1 完成
+- **今日日期：** 2026-06-08
+- **状态：** W5 Day 3 完成 → 下次继续 W5 Day 4（Checkpoint 深入）
+- **学习方案：** W5-W7 修订方案见 `E:\.claude\plans\mutable-doodling-wolf.md`
+- **战略调整：** 目标收窄为「AI + 业务场景」型公司（跨境电商/出海/外贸），核心卖点 = 懂 AI + 能落地业务，不和纯程序员比工程底子。详情见 memory/career-strategy-shift.md。
 - **特殊：** MiMo-V2.5-Pro Token Plan 激活（5/23 → 6/23），已接入 Codex Desktop
 - **兴趣线：** 游戏开发（业余，入职前不主动投入时间）→ 计划见 `[[game-dev-track]]`
 - **基础线：** F1-F3 全部完成（函数基础 / 数据结构操作 / JSON & 序列化）
@@ -71,6 +73,8 @@ updated: 2026-06-04
 
 ## W5 进度（W5 — Agent 工程化）
 - ✅ Day 1 完成：Agent 三范式对比 — ReAct / Plan-then-Execute（方式 B+C）/ Reflexion 纯 API 实现，同一任务对比三种范式差异
+- ✅ Day 2 完成：LangGraph 重构 ReAct — StateGraph + ToolNode + tools_condition + checkpoint，对比手写 vs 框架的代码量差异
+- ✅ Day 3 完成：LangGraph 实现 Plan-Execute + Reflexion — 三张图拓扑对比，自定义 router 替代 tools_condition，验证"图拓扑不同=范式不同"
 
 ## 遇到的困难（W5）
 - Day 1: `plan_text.count("步骤")` 多数了步数 → 计划文本说明文字也含"步骤"，导致多跑空轮次
@@ -78,8 +82,35 @@ updated: 2026-06-04
 - Day 1: 伪代码 `[...]` 和 `...` 当真实代码 → Python 不认，要用实际变量
 - Day 1: `response.choices[0].message` 拿了整个对象而不是 `.content` → 格式不对
 
-## 明日计划
-- W5 Day 2：MCP 入门 或 Agent Skills vs Tools 体系
+## 产品化冲刺 ✅ 完成（2026-06-05，1 天）
+
+| 步骤 | 内容 | 结果 |
+|------|------|------|
+| D1 配置管理 | 零硬编码，全部走 config.py + 环境变量 | ✅ |
+| D2 日志 | logging 模块替代 print，含时间戳 + 级别 | ✅ |
+| D3 错误处理 | 5 个关键点 try/except，中文提示不红屏 | ✅ |
+| D3 启动检测 | Embedding/LLM/ChromaDB 启动时校验，有问题提前暴露 | ✅ |
+| D4 Dockerfile | CPU-only torch（省 1.5GB） | ✅ |
+| D4 docker-compose | 一键启动 build_index + app | ✅ |
+| D4 README | 项目说明、部署步骤、测试结果 | ✅ |
+| D5 测试 | 5 条固定测试，5/5 通过 | ✅ |
+| Docker 验证 | 构建 → 建索引 → 启动 → HTTP 200 | ✅ |
+
+**项目位置：** `projects/ecommerce-rag/`
+
+### 产品化中学到的
+- Docker Hub 国内需配镜像加速器
+- PyTorch 默认拉 CUDA 500MB+，CPU 版只需 ~100MB
+- ChromaDB 已存在集合需先删再建
+- Docker Compose `${VAR}` 从 `.env` 文件或 shell 环境读取
+- docker-compose.yml 的 `version` 字段已废弃
+
+### AI 协作规则（本次总结）
+- 改动超 3 文件先写方案，一次改一个文件
+- 改完就跑验证，通过就 commit
+- 需求单里没写的不要加
+- 信任层级：生成式 > 编辑式 > 删除式
+- 一个对话只干一件事
 
 ## 已完成的产出
 | 周 | 产出 | 链接 |
@@ -109,8 +140,13 @@ updated: 2026-06-04
 | F1 | fund_functions.py（函数基础 — def/参数/return/嵌套函数） | projects/exercise/fund_functions.py |
 | F2 | fund_data_structures.py（数据结构操作 — dict/list/嵌套取值/排序） | projects/exercise/fund_data_structures.py |
 | F3 | fund_json.py（JSON & 序列化 — dumps/loads/dump/load/API 模拟） | projects/exercise/fund_json.py |
+| F4-1 | Docker 镜像与容器 — Dockerfile、build/run/logs/exec、层缓存、.dockerignore（产品化冲刺完成） | projects/ecommerce-rag/ |
+| F4-2 | Docker 多容器编排 — docker-compose、网络、volume、环境变量、depends_on（产品化冲刺完成） | projects/ecommerce-rag/ |
 | W5 | day1_three_paradigms.py（Agent 三范式对比 — ReAct + Plan-Execute B/C + Reflexion） | projects/w5-agent-paradigms/day1_three_paradigms.py |
 | W5 | paradigm-comparison.md（三范式实测对比分析） | projects/w5-agent-paradigms/paradigm-comparison.md |
+| W5 | day2_langgraph_react.py（LangGraph 重构 ReAct — StateGraph + ToolNode + checkpoint） | projects/w5-agent-paradigms/day2_langgraph_react.py |
+| W5 | day3_langgraph_paradigms.py（LangGraph Plan-Execute + Reflexion — 三图拓扑对比） | projects/w5-agent-paradigms/day3_langgraph_paradigms.py |
+| PRD | 电商客服 RAG 产品化 — 完整产品级项目（config/logging/Docker/测试） | projects/ecommerce-rag/app.py |
 
 ## 收入记录
 | 日期 | 来源 | 金额 |

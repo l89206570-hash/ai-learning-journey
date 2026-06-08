@@ -8,7 +8,7 @@ updated: 2026-05-26
 ---
 
 # AI 学习资源库
-> 自动维护，每周更新 | 最后更新: 2026-05-26
+> 自动维护，每周更新 | 最后更新: 2026-06-08
 
 ## 当前推荐学习（按优先级排序）
 1. [Agent Learning Hub](https://github.com/datawhalechina/Agent-Learning-Hub) — Datawhale 系统性 AI Agent 路线图 + 11 级项目阶梯，适合 W4-W10
@@ -18,6 +18,17 @@ updated: 2026-05-26
 5. [RAGFlow](https://github.com/infiniflow/ragflow) — 生产级 RAG 引擎，学习架构设计，适合 W7
 6. [Dify](https://github.com/langgenius/dify) — 开源 LLM 应用平台，学习产品化思路，适合 W8
 7. [CrewAI](https://github.com/crewAIInc/crewAI) — 最快上手 Multi-Agent，适合 W10
+8. [Superpowers](https://github.com/obra/superpowers) — Agent 行为层，强制设计门+计划+微任务 TDD，防 Agent 跳过设计直接写代码，适合 W5+
+
+## 最近动态（2026-06-08 扫描）
+
+**LangGraph 2.0 生产化：** 2月发布，Guardrail Nodes（ContentFilter/RateLimiter/AuditLogger）提升为一等原语，原生 MCP/A2A 多智能体协议支持，v1 起承诺 2.0 前不引入破坏性变更。v1.2.x 系列持续迭代到 6 月。
+
+**MCP 协议成熟：** 已捐赠给 Agentic AI Foundation（Linux Foundation），月下载量 ~9700 万（16 个月增长 4750%）。MCP 负责 Agent↔Tool 连接，A2A 负责 Agent↔Agent 通信。2026-07-28 spec 大版本锁定，转向无状态协议。安全成 CISO 级关注点。
+
+**Claude Agent SDK 订阅化：** 2026-06-15 起，Claude Pro/Max/Team 订阅包含每月 Agent SDK 额度（$20-$200），无需单独 API Key。Claude Code 新增 Dynamic Workflows（研究预览）——多 Agent 并行协调。
+
+**Agent 工程最佳实践收敛：** 设计门→计划→微任务 TDD→双审（规格+质量）成为共识工作流。Agent 异步运行+消息通道审批替代实时盯着看。推理引擎层开始为 Agent 工作负载做 KV Cache 生命周期管理。
 
 ## GitHub 项目
 | 项目 | Stars | 为什么值得学 | 适合阶段 | 收录日期 |
@@ -35,6 +46,9 @@ updated: 2026-05-26
 | Gemini CLI | 97K+ | Google 官方开源终端 Agent，原生 MCP 支持，1M Token 上下文 | W6 | 2026-05-26 |
 | DeerFlow | 25K+ | 字节跳动开源，Planning+Tools+Memory+Execution 深度研究 Agent | W6-W10 | 2026-05-26 |
 | n8n | 179K+ | 可视化工作流自动化，原生 AI Agent 节点，400+ 集成 | W8 | 2026-05-26 |
+| Superpowers | 150K+ | Agent 行为层框架，强制 Brainstorm→Plan→Execute+TDD 工作流，防 Agent 直接瞎写代码 | W5-W10 | 2026-06-08 |
+| MCP Workbench | — | MCP 协议可视调试器，查看 JSON-RPC 原始负载、握手、工具 schema | W6 | 2026-06-08 |
+| MCP-Universe | — | MCP Agent 构建+评测框架，含 MCP+ 输出压缩（省 75% Token）和 MCPMark 基准 | W6-W8 | 2026-06-08 |
 
 ## 教程 & 文章
 | 标题 | 链接 | 主题 | 适合阶段 | 收录日期 |

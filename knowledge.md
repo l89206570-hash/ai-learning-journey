@@ -887,3 +887,166 @@ messages.append("请检查你的回答是否完整正确")
 | 反思提示缩在第一个 for 循环里面 | 缩进错了，写在 `if/else` 同级而不是 for 同级 | 反思提示放在两个 for 之间，和 for 同级缩进 |
 | 反思提示里用了 `[...]` 和 `...` | 伪代码占位符被当成真实代码，Python 不认 | 用实际变量 `[tool_call.model_dump()]` 和 `tool_call.id` |
 | Plan-Execute 首次调 API 用了整个 msg 对象 | `plan_text = response.choices[0].message` 拿到的是对象不是文本 | 用 `.message.content` 取文本，`messages.append({"role":"assistant","content":plan_text})` |
+
+---
+
+## [[LangGraph]] Agent 框架（W5D2）
+
+> 用 LangGraph 重建 Day 1 的 ReAct Agent，对比框架 vs 手写的差异。
+
+### 核心定位
+
+| 认知 | 要点 | 来源 |
+|------|------|------|
+| LangGraph 是什么 | **状态图执行引擎**——提供节点+边+状态的积木，你搭什么图就什么范式。不是"ReAct 框架"，是"搭 Agent 工作流的框架" | W5D2 |
+| LangGraph vs ReAct | ReAct 是**设计模式**（思考→行动→观察），LangGraph 是**执行引擎**（搭图跑工作流）。就像户型图 vs 施工队——心里有户型图，施工队才盖得出房子 | W5D2 |
+| 不适合的场景 | 简单线性 A→B→C、无状态一次性任务、极低延迟要求、工具集动态变化、非 Python 栈 | W5D2 |
+
+### Day 1 手写 → Day 2 LangGraph 映射
+
+| Day 1 手写 | Day 2 LangGraph 替你做 | 省了什么 |
+|------|------|------|
+| `messages = [...]` 手动管理列表 | `AgentState(TypedDict)` + `add_messages` reducer | 消息追加、去重、合并自动完成 |
+| `while turn in range(...):` 循环控制 | `StateGraph.compile()` 图执行引擎 | 不用写循环，引擎自动在节点间流转 |
+| `if msg.tool_calls: ... else: return` | `tools_condition` 条件边 | 不用手写判断分支 |
+| `json.loads(args)` + `TOOL_MAP[name](**args)` | `ToolNode(TOOLS)` | 自动解析参数→执行函数→返回 ToolMessage |
+| `messages.append(...)` 两条 | 节点返回 `{"messages": [...]}` + reducer 自动合并 | 只管返回，不用关心怎么追加 |
+| `max_turns` 手动计数 | `recursion_limit` 参数（编译时设，默认 25） | 框架兜底防死循环 |
+| 无持久化 | `MemorySaver` checkpoint | 每步自动保存状态，可暂停/恢复/回溯 |
+
+### LangGraph API 速查
+
+#### 图结构
+
+| API | 作用 | 来源 |
+|------|------|------|
+| `StateGraph(AgentState)` | 创建状态图，绑定你定义的状态类型 | W5D2 |
+| `graph.add_node("名字", 函数)` | 添加节点——图中执行具体逻辑的地方 | W5D2 |
+| `graph.add_edge("A", "B")` | 固定边：A 执行完一定去 B | W5D2 |
+| `graph.add_conditional_edges("A", 判断函数)` | 条件边：A 执行完后根据判断函数返回值决定去向 | W5D2 |
+| `graph.set_entry_point("A")` | 指定图的入口节点 | W5D2 |
+| `graph.compile(checkpointer=...)` | 编译成可执行图（传 MemorySaver 开启 checkpoint） | W5D2 |
+| `tools_condition` | 内置判断函数：消息有 tool_calls → `"tools"`，否则 → `END` | W5D2 |
+
+#### 状态管理
+
+| API | 作用 | 来源 |
+|------|------|------|
+| `TypedDict` + `Annotated[list, add_messages]` | 定义 State：`add_messages` 是 reducer，新消息自动追加而非覆盖 | W5D2 |
+| `MemorySaver()` | 内存中的 checkpoint 存储器，每步自动保存状态 | W5D2 |
+| `app.stream(state, config)` | 逐步执行图，每步 yield event（调试用） | W5D2 |
+| `app.get_state(config)` | 执行完后获取最终 State | W5D2 |
+
+#### LangChain 消息类型（替代纯 dict）
+
+| 类 | 用途 | 对应纯 dict |
+|------|------|------|
+| `SystemMessage(content=...)` | 系统提示（角色设定） | `{"role": "system", ...}` |
+| `HumanMessage(content=...)` | 用户消息 | `{"role": "user", ...}` |
+| `AIMessage(content=..., tool_calls=...)` | AI 回复（含工具调用请求） | `{"role": "assistant", ...}` |
+
+#### 工具相关
+
+| API | 作用 | 来源 |
+|------|------|------|
+| `@tool` 装饰器 | 把普通函数包装成 LangChain Tool，自动从类型标注和 docstring 生成参数 schema——替代 Day1 手写 35 行 JSON | W5D2 |
+| `convert_to_openai_function(tool)` | LangChain Tool → OpenAI API 需要的 `{"type":"function","function":{...}}` 格式 | W5D2 |
+| `convert_to_openai_messages(messages)` | LangChain 消息列表 → OpenAI API 需要的 dict 列表 | W5D2 |
+| `ToolNode(tool_list)` | 自动执行工具调用的节点：解析 AIMessage.tool_calls → 执行函数 → 返回 ToolMessage | W5D2 |
+
+### ReAct 图结构
+
+```
+START → agent_node ──┬── tools_condition ──→ tool_node ──┐
+                      │                                   │
+                      └── tools_condition ──→ END         │
+                                                          │
+                            ←─────────────────────────────┘
+```
+
+### 踩坑
+
+| 问题 | 原因 | 解决 |
+|------|------|------|
+| `ToolNode(TOOL_MAP)` 报 AttributeError | ToolNode 需要 `@tool` 装饰的函数，不是裸 Python 函数 | 给函数加 `@tool` 装饰器 |
+| OpenAI API 报 missing `role` | LangChain 消息对象不能直接传给 OpenAI SDK | 用 `convert_to_openai_messages()` 转换 |
+| `ChatCompletionMessage` 不被 add_messages 识别 | OpenAI SDK 返回的是自己的类型，不是 LangChain 消息 | 手动转成 `AIMessage(content=..., tool_calls=...)` |
+| `@tool` 没有 `openai_schema` 属性 | 属性名猜错了 | 用 `convert_to_openai_function(t)` 转换 |
+
+### 三范式图拓扑对比（W5D3）
+
+> 用 LangGraph 分别搭建 Plan-Execute 和 Reflexion 图。验证"图拓扑不同 = 范式不同"。
+
+**三张图的拓扑结构：**
+
+```
+ReAct:       agent ←→ tools              — 一个循环，agent 自己决定何时停
+
+Plan-Exec:   plan → execute ←→ tools     — 先出路线图，再进入执行循环
+
+Reflexion:   agent ←→ tools              — 多一个"质检站"
+               ↓
+             reflect → agent (重来)
+               ↓
+              END
+```
+
+**关键差异在路由逻辑：**
+
+| 范式 | agent 之后去哪 | 谁决定结束 |
+|------|--------------|-----------|
+| ReAct | 有 tool_calls → tools；无 → END | agent 自己（tools_condition） |
+| Plan-Exec | 同上 | agent 自己 |
+| Reflexion | 有 tool_calls → tools；无 → **reflect** | **reflect 节点**（不是 agent） |
+
+---
+
+#### Q1：Plan 节点为什么不带 tools？
+
+Plan 阶段是制定路线图，不是执行。给了 tools 后 LLM 会直接调工具——那就变成 ReAct 了，失去了"先想清楚再动手"的设计意图。
+
+#### Q2：`agent_router` 和 `tools_condition` 的区别？
+
+`tools_condition` 是"无 tool_calls → END"，直接结束。Reflexion 不能直接结束，必须先经过 reflect 做质检。所以必须自定义 `agent_router`：无 tool_calls → `"reflect"`（不是 `END`）。
+
+#### Q3：`reflection_count` 上限为什么必要？
+
+LLM 可能在反思文本中提到 "FINAL" 这个词但不是真的满意（比如分析"FINAL 这个标记的用法"）。去掉上限后如果 `reflect_router` 永远不返回 `"done"`，图会在 agent ↔ reflect 之间无限循环，吃光 Token。
+
+#### Q4：为什么三种范式共用同一个 `AgentState`？
+
+State 里 `plan` 和 `reflection_count` Plan-Execute 和 Reflexion 各自只用一个。分两个 State 定义会导致重复代码、节点函数不能跨图复用。LangGraph 允许 State 有多余字段——不用的不理就行。
+
+#### Q5：`execute_node` 里 "按计划执行" 的去重判断做什么？
+
+防止**消息膨胀**。每次 tools 返回后 execute_node 都重新执行，如果不判断就会反复追加 "请按计划执行"——调 5 次工具就多 5 条重复指令，白白吃掉 context window。循环本身由 `tools_condition` 控制，跟这条消息无关。
+
+#### Q6：LangGraph 图方案比 Day 1 纯 for 循环方案好在哪？
+
+| | 纯 for 循环 | LangGraph 图 |
+|------|-----------|------------|
+| 状态持久化 | 手动管理 messages 列表 | `MemorySaver` 每节点后自动 checkpoint，可随时 `get_state()` |
+| 执行追踪 | 手动 print | `app.stream()` 自动在每个节点后 yield 事件 |
+| 流转逻辑 | 命令式（for + if + break），需要心智推演 | 声明式（`add_conditional_edges`），一眼看到拓扑 |
+
+**不是代码量少了、不是循环次数少了**——本质是声明式 > 命令式的可读性提升 + 框架自动做 checkpoint/stream。
+
+#### Q7：Plan 阶段不知道有 search 工具，输出了"我无法访问外部资源"，是 bug 还是取舍？
+
+是取舍。Plan 节点 `with_tools=False`，LLM 根本不知道有什么工具可用。解决方案不是给 plan 加 tools，而是在 `PLAN_SYSTEM` 系统提示里**列出可用工具**：
+
+```python
+PLAN_SYSTEM = """...可用工具：
+- search_knowledge: 在知识库中搜索概念
+- calculate: 计算数学表达式
+请据此制定计划。"""
+```
+
+这样 plan 知道能搜什么，输出的计划会更具体（"步骤1：查 Python、RAG、Agent"），而不是"我无法访问外部资源"。
+
+#### 新发现
+
+- Plan 不带 tools 时如果 LLM 自身知识足够，plan 阶段就成了"预回答"，execute 是补充验证——不是 bug，是特性。对简单任务 plan 一步就够。
+- 自定义路由函数（`agent_router` / `reflect_router`）是 LangGraph 和手写最大的设计思维差异：手写是"我按顺序调"，LangGraph 是"我定义规则，框架执行"。
+
+| 来源 | W5D3 |
