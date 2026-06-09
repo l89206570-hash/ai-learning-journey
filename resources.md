@@ -4,11 +4,11 @@ tags:
   - ai-learning
   - reference
 created: 2026-05-22
-updated: 2026-05-26
+updated: 2026-06-09
 ---
 
 # AI 学习资源库
-> 自动维护，每周更新 | 最后更新: 2026-06-08
+> 自动维护，每周更新 | 最后更新: 2026-06-09
 
 ## 当前推荐学习（按优先级排序）
 1. [Agent Learning Hub](https://github.com/datawhalechina/Agent-Learning-Hub) — Datawhale 系统性 AI Agent 路线图 + 11 级项目阶梯，适合 W4-W10
@@ -20,7 +20,15 @@ updated: 2026-05-26
 7. [CrewAI](https://github.com/crewAIInc/crewAI) — 最快上手 Multi-Agent，适合 W10
 8. [Superpowers](https://github.com/obra/superpowers) — Agent 行为层，强制设计门+计划+微任务 TDD，防 Agent 跳过设计直接写代码，适合 W5+
 
-## 最近动态（2026-06-08 扫描）
+## 最近动态（2026-06-09 扫描）
+
+**GitHub 2026 趋势确认：** Dify 143K stars 领跑全平台，Hermes Agent 150K（自学习个人 AI）、OpenHands 60.5K（自主编程 Agent）、MetaGPT 59.6K（多 Agent 模拟软件公司）、OpenCode 55K（模型无关编程 Agent）、Cline 49K（VS Code 原生 Agent）。Rust 开始进入 Agent 框架（推理速度 3.8x Python），上下文压缩层（Headroom）成为新基建。
+
+**杭州招聘验证：** 海康/钉钉/字节/淘天/招商银行全线招聘 AI Agent 开发。核心技能要求：Python（必会）、LangChain/LangGraph、RAG、Agent 框架、Prompt Engineering。加分项：Java/Go、Docker/K8s、模型微调（SFT/RLHF）、MCP 协议。实习岗 12K-18K/月。钉钉要求持有《AI应用工程师》证书——关注是否需要考。
+
+**React + AI Stack 固化：** Next.js 15 + Vercel AI SDK + Zustand 成为前端标配。"Vibe Coding"（自然语言生成完整实现）成为新默认开发范式。
+
+### 2026-06-08 扫描（上周）
 
 **LangGraph 2.0 生产化：** 2月发布，Guardrail Nodes（ContentFilter/RateLimiter/AuditLogger）提升为一等原语，原生 MCP/A2A 多智能体协议支持，v1 起承诺 2.0 前不引入破坏性变更。v1.2.x 系列持续迭代到 6 月。
 
@@ -37,8 +45,8 @@ updated: 2026-05-26
 | RAG_DeepDive_HandsOn | — | RAG 从入门到 Agentic 的完整实操 | W4 | 2026-05-20 |
 | RAGFlow | 40K+ | 生产级 RAG 架构参考，企业级设计 | W4-W7 | 2026-05-20 |
 | awesome-ai-agents-2026 | — | 2026 Agent 生态全景，选型必看 | W6 | 2026-05-20 |
-| Dify | 132K+ | LLM 应用产品化最佳参考，2026 年增长迅猛 | W8 | 2026-05-20 |
-| CrewAI | 44K+ | 最快上手多 Agent 协作 | W10 | 2026-05-20 |
+| Dify | 143K+ | LLM 应用产品化最佳参考，2026 年增长迅猛 | W8 | 2026-05-20 |
+| CrewAI | 47.8K+ | 最快上手多 Agent 协作 | W10 | 2026-05-20 |
 | Agent Learning Hub | — | Datawhale 系统性 AI Agent 学习路线图 + 11 级项目阶梯 | W4-W10 | 2026-05-22 |
 | LangGraph | 10K+ | 复杂状态ful Agent 工作流 | W6-W10 | 2026-05-20 |
 | LlamaIndex | 46K+ | 文档级 RAG 最强框架 | W4-W7 | 2026-05-20 |
@@ -46,6 +54,13 @@ updated: 2026-05-26
 | Gemini CLI | 97K+ | Google 官方开源终端 Agent，原生 MCP 支持，1M Token 上下文 | W6 | 2026-05-26 |
 | DeerFlow | 25K+ | 字节跳动开源，Planning+Tools+Memory+Execution 深度研究 Agent | W6-W10 | 2026-05-26 |
 | n8n | 179K+ | 可视化工作流自动化，原生 AI Agent 节点，400+ 集成 | W8 | 2026-05-26 |
+| Headroom | — | 上下文压缩层，AST 感知代码压缩，可逆压缩架构，MCP Server 集成 | W6-W8 | 2026-06-09 |
+| CC Switch | — | 多 AI 工具配置统一管理，50+ provider 预设，用量统计 | W6 | 2026-06-09 |
+| Hermes Agent | 150K+ | NousResearch 自学习个人 AI，持久记忆，本地运行 | W8-W10 | 2026-06-09 |
+| MetaGPT | 59.6K+ | 多 Agent 模拟整个软件公司，需求→架构→代码全流程 | W10 | 2026-06-09 |
+| OpenCode | 55K+ | 模型无关编程 Agent，支持任意 provider 切换 | W6 | 2026-06-09 |
+| Cline | 49K+ | VS Code 原生 AI Agent，视觉共享，人在回路审批 | W6 | 2026-06-09 |
+| Mastra | 10K+ | TypeScript 全栈 AI 框架，Zod 类型安全，端到端 | W8 | 2026-06-09 |
 | Superpowers | 150K+ | Agent 行为层框架，强制 Brainstorm→Plan→Execute+TDD 工作流，防 Agent 直接瞎写代码 | W5-W10 | 2026-06-08 |
 | MCP Workbench | — | MCP 协议可视调试器，查看 JSON-RPC 原始负载、握手、工具 schema | W6 | 2026-06-08 |
 | MCP-Universe | — | MCP Agent 构建+评测框架，含 MCP+ 输出压缩（省 75% Token）和 MCPMark 基准 | W6-W8 | 2026-06-08 |

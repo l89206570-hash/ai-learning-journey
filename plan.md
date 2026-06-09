@@ -58,22 +58,19 @@
 
 面试时"你关注什么信息源"是高频问题，养成习惯本身就是面试素材。具体源清单见 `resources.md`。
 
-## 最新扫描（2026-05-26）
+## 最新扫描（2026-06-09）
 
 **技术栈确认：** 当前选型无需调整。Agent + RAG + MCP 方向正确，杭州招聘 JD 完全匹配。
 
-**杭州目标公司（2026 春招/校招）：**
+**杭州招聘动态：**
+- 海康/钉钉/字节/淘天/招商银行全线招聘 AI Agent 开发
+- 核心技能：Python、LangChain/LangGraph、RAG、Agent 框架、Prompt Engineering
+- 加分项：Java/Go、Docker/K8s、MCP 协议、模型微调
+- 实习岗 12K-18K/月，社招更高
+- ⚠️ 钉钉部分岗位要求《AI应用工程师》证书——关注是否需要考
 
-| 公司 | 方向 | 要求 | 备注 |
-|------|------|------|------|
-| 钉钉（阿里） | AI 应用研发 | Cursor/Claude Code、LangChain、Java/Python/JS | 余杭，10-20K |
-| 字节跳动 | AI Platform 后端 | Go/Python/C++、AutoGPT/LangChain | 2026 校招 |
-| 精准学 | AI 教育 | 通义千问、高并发 Agent、多模态 | 阿里近 2 亿投资，5/30 网申截止 |
-| 海康威视 | AI 解决方案 | ML/DL/大模型 | 滨江 |
-| 迪普科技 | 网络安全 AI | Python、AI 模型 | 滨江，硕士优先 |
+**新增推荐仓库：** Headroom（上下文压缩）、MetaGPT、Cline、Mastra、Hermes Agent — 详情见 resources.md
 
-**新增推荐仓库：** OpenClaw (302K)、Gemini CLI (97K)、DeerFlow (25K)、n8n (179K) — 详情见 resources.md
-
-**进度：** 🟢 W5 Day 2 完成（6/8）。LangGraph 重构 ReAct Agent。学习方案已修订，详见 advanced-plan.md 和下方 W5-W7 路线。
+**进度：** 🟢 W5 Day 3 完成（6/8）。三 Agent 范式对比 + LangGraph 三图拓扑验证完成。下一步 W5 Day 4（Checkpoint 深入）。产品化冲刺已完成（Docker/docker-compose/日志/测试 全部通过）。
 
 **战略调整（2026-06-05）：** 目标公司类型收窄为「AI + 业务场景」型（跨境电商/出海/外贸），不投 AI 基础设施/平台型公司。核心竞争力 = 懂 AI + 能落地业务场景，不和纯程序员比工程底子。
