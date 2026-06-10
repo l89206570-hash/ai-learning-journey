@@ -71,6 +71,6 @@
 
 **新增推荐仓库：** Headroom（上下文压缩）、MetaGPT、Cline、Mastra、Hermes Agent — 详情见 resources.md
 
-**进度：** 🟢 W5 Day 3 完成（6/8）。三 Agent 范式对比 + LangGraph 三图拓扑验证完成。下一步 W5 Day 4（Checkpoint 深入）。产品化冲刺已完成（Docker/docker-compose/日志/测试 全部通过）。
+**进度：** 🟢 W5 Day 7 完成（6/10）。MCP + LangGraph 集成——适配层三步（list_tools → create_model → coroutine 包装），async StructuredTool + astream()，Agent 通过 MCP 协议调远程工具，图拓扑不变。W5 全部完成。
 
 **战略调整（2026-06-05）：** 目标公司类型收窄为「AI + 业务场景」型（跨境电商/出海/外贸），不投 AI 基础设施/平台型公司。核心竞争力 = 懂 AI + 能落地业务场景，不和纯程序员比工程底子。

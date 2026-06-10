@@ -7,7 +7,7 @@ tags:
   - rag
   - streamlit
 created: 2026-05-21
-updated: 2026-06-04
+updated: 2026-06-09
 ---
 
 # 知识点存档
@@ -291,7 +291,86 @@ updated: 2026-06-04
 
 ---
 
+### dataclass 数据类（W5D5）
+
+| 概念 | 要点 |
+|------|------|
+| `@dataclass` 装饰器 | 自动生成 `__init__`、`__repr__`、`__eq__`，省掉手写样板代码 |
+| `field(default_factory=list)` | 可变默认值（list/dict）必须用 `default_factory`，不能直接写 `= []`——否则所有实例共享同一个列表 |
+
+### Callable 类型标注（W5D5）
+
+| 概念 | 要点 |
+|------|------|
+| `Callable` | 标注"这个变量存的是函数"，和 `str`/`int`/`list` 同类 |
+| `tool_map: dict[str, Callable]` | 字典的值是函数引用，不是普通数据 |
+
+### lambda 匿名函数（W5D5）
+
+| 概念 | 要点 |
+|------|------|
+| `lambda 参数: 表达式` | 不需要 `def` 的函数，一行写完 |
+| 常用场景 | 回调函数（`check=lambda ans: ...`）、排序 key（`key=lambda s: s["score"]`） |
+| 限制 | 不能多条语句、不能有类型标注 |
+
+### 闭包默认参数模式（W5D7）
+
+| 概念 | 要点 |
+|------|------|
+| 问题 | for 循环里创建函数，所有函数引用同一个循环变量（循环结束后的最终值） |
+| 解决 | 用默认参数 `_name=tool_name`——默认参数在**函数定义时**求值，能"定住"当前值 |
+
+### create_model() 动态创建类（W5D7）
+
+| 概念 | 要点 |
+|------|------|
+| `pydantic.create_model(name, **fields)` | 运行时动态生成 Pydantic model，不需要写 `class Xxx(BaseModel): ...` |
+| 为什么需要 | MCP 工具的参数 schema 是运行时从 Server 拿到的，不能预先定义类 |
+
+### sys.stderr vs sys.stdout（W5D6）
+
+| 概念 | 要点 |
+|------|------|
+| `sys.stdout` | 标准输出，程序正常数据的出口 |
+| `sys.stderr` | 标准错误，日志和错误信息的出口 |
+| MCP 场景 | Server 用 stdout 传 JSON-RPC 协议数据，日志必须打到 stderr 避免污染 |
+
 ---
+
+## [[asyncio 异步编程]]（W5D6-D7）
+
+> Python 异步模型：`async def` + `await` + event loop。
+
+### 核心概念
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| 同步 vs 异步 | 同步 = 一件事做完再做下一件；异步 = 等 IO 时可以切换到其他任务 | W5D6 |
+| `async def` | 声明异步函数，函数体内可以用 `await` | W5D6 |
+| `await` | "等这个异步操作完成，其间让出控制权给其他任务" | W5D6 |
+| `asyncio.run()` | 同步世界调 async 的入口：创建事件循环 → 跑协程 → 关闭循环 | W5D6 |
+| 事件循环 (event loop) | 异步程序的调度器，管理所有 async 任务的执行和切换 | W5D7 |
+
+### async with — 异步上下文管理器（W5D6）
+
+| 概念 | 要点 |
+|------|------|
+| `async with` | 和 `with` 一样是"自动关资源"，但用于异步资源（网络连接、子进程通信等） |
+
+### async for — 异步迭代（W5D7）
+
+| 概念 | 要点 |
+|------|------|
+| `async for` | 和 `for` 一样遍历，但每次迭代需要 await（如流式接收数据） |
+
+### 踩坑
+
+| 问题 | 原因 | 解决 |
+|------|------|------|
+| `asyncio.run()` 嵌套报 RuntimeError | Python 3.10+ 不允许在已运行的 event loop 里再调 `asyncio.run()` | 全程 async（工具用 `coroutine=`，图用 `astream()`）；或用 `nest_asyncio.apply()` |
+
+---
+
 ## [[RAG]]（检索增强生成）
 
 ### 核心概念
@@ -793,6 +872,9 @@ Agent 收到的是工具名**字符串**（如 `"calculate"`），不能直接 `
 | 中文标点 vs 英文标点                | `f"你好，{name}!"` 用英文 `!`，测试期望中文 `！` | 字符串内容注意中英文标点一致 | F1练习 |
 | `chromadb` 与 `sentence-transformers` 版本不兼容 | `chromadb 1.5.9` + `sentence-transformers 5.5.1` → `RustBindingsAPI` 报错 | 降级 `sentence-transformers==3.0.1` | W4D7 |
 | ChromaDB collection embedding 不一致 | 建库没用 BGE，查库指定 BGE → `ValueError: embedding function conflict` | 重建 collection 统一 embedding function | W4D7 |
+| `langgraph.checkpoint.sqlite` 模块找不到 | LangGraph 1.x 把 checkpoint 实现拆成独立包，不随 `langgraph` 自动安装 | `pip install langgraph-checkpoint-sqlite` | W5D4 |
+| `interrupt()` 不抛异常 | LangGraph 1.2.4 中 interrupt 不抛 `GraphInterrupt`，而是 `invoke()` 正常返回，结果里带 `__interrupt__` 字段 | 用 `if "__interrupt__" in result` 判断，不能用 try/except | W5D4 |
+| 拒绝 tool_calls 后 `add_messages` append → LLM 报错 | DeepSeek 要求每条 tool_calls 消息后面必须有匹配的 tool messages。直接 append 拒绝消息不删原 tool_calls 消息 → 400 error | 用 `RemoveMessage(id=msg.id)` 删掉原 tool_calls 消息，再 append 替换消息 | W5D4 |
 
 ---
 
@@ -956,6 +1038,14 @@ messages.append("请检查你的回答是否完整正确")
 
 ### ReAct 图结构
 
+```mermaid
+graph TD
+    START([START]) --> agent[agent 节点<br/>调用 LLM]
+    agent -->|有 tool_calls| tools[tools 节点<br/>ToolNode 执行工具]
+    agent -->|无 tool_calls| END([END])
+    tools --> agent
+```
+
 ```
 START → agent_node ──┬── tools_condition ──→ tool_node ──┐
                       │                                   │
@@ -978,6 +1068,31 @@ START → agent_node ──┬── tools_condition ──→ tool_node ──�
 > 用 LangGraph 分别搭建 Plan-Execute 和 Reflexion 图。验证"图拓扑不同 = 范式不同"。
 
 **三张图的拓扑结构：**
+
+```mermaid
+graph TD
+    subgraph ReAct["ReAct 范式"]
+        R_START([START]) --> R_AG[agent]
+        R_AG -->|tool_calls| R_TOOL[tools]
+        R_TOOL --> R_AG
+        R_AG -->|无 tool_calls| R_END([END])
+    end
+    subgraph PlanExec["Plan-Execute 范式"]
+        P_START([START]) --> P_PLAN[plan<br/>不带 tools]
+        P_PLAN --> P_EXEC[execute]
+        P_EXEC -->|tool_calls| P_TOOL[tools]
+        P_TOOL --> P_EXEC
+        P_EXEC -->|无 tool_calls| P_END([END])
+    end
+    subgraph Reflexion["Reflexion 范式"]
+        F_START([START]) --> F_AG[agent]
+        F_AG -->|tool_calls| F_TOOL[tools]
+        F_TOOL --> F_AG
+        F_AG -->|无 tool_calls| F_REF[reflect<br/>质检]
+        F_REF -->|不满意| F_AG
+        F_REF -->|满意| F_END([END])
+    end
+```
 
 ```
 ReAct:       agent ←→ tools              — 一个循环，agent 自己决定何时停
@@ -1050,3 +1165,330 @@ PLAN_SYSTEM = """...可用工具：
 - 自定义路由函数（`agent_router` / `reflect_router`）是 LangGraph 和手写最大的设计思维差异：手写是"我按顺序调"，LangGraph 是"我定义规则，框架执行"。
 
 | 来源 | W5D3 |
+
+### Checkpoint 系统深入（W5D4）
+
+> 深入 [[LangGraph]] Checkpoint 的三个关键能力：持久化、暂停审批、时间旅行。
+> 核心认知：这三个能力 = LangGraph 和手写 Agent 循环的**代差**。
+
+#### 三个能力对比
+
+```
+SqliteSaver         interrupt()          时间旅行
+─────────────────   ─────────────────    ─────────────────
+"记到硬盘"          "跑到这停住"         "回到存档点"
+跨进程持久化        运行时等人决策        查看/修改/分叉历史
+```
+
+三个都依赖 checkpointer——没有 checkpointer，interrupt 没法存暂停状态，时间旅行也没法回到历史。
+
+#### SqliteSaver vs MemorySaver
+
+| | [[MemorySaver]] | [[SqliteSaver]] |
+|------|-----------|------------|
+| 存储位置 | 内存 | SQLite 文件（`checkpoint.db`） |
+| 生命周期 | 进程内 | 跨进程、跨重启 |
+| 换新实例 | 数据丢失 | 连同一个 db 文件，数据还在 |
+| 适用场景 | 开发调试、单次脚本 | 生产环境、需持久化 |
+
+#### interrupt() — 暂停等人审批
+
+`interrupt()` 是**运行时断点**，在节点内部暂停图执行，等人给值后继续。
+
+和 `tools_condition` 的本质区别：
+
+| | tools_condition | interrupt() |
+|------|-----------|------------|
+| 时机 | 编译时确定的规则 | 运行时等人输入 |
+| 是否自动 | 自动（有 tool_calls → tools） | 手动（人等输入后继续） |
+| 类比 | 红绿灯（自动换灯） | 交警拦车（人举手才过） |
+
+**关键认知：** interrupt 不是状态储存器。存储状态的是 checkpointer（[[SqliteSaver]]/[[MemorySaver]]），interrupt 只是"停住"这一个动作。
+
+#### 时间旅行 — get_state / update_state
+
+| API | 作用 | 类比 |
+|------|------|------|
+| `get_state_history(config)` | 列出所有历史 checkpoint | 翻存档列表 |
+| `get_state(config)` | 读取某个 checkpoint 的消息 | 读存档内容 |
+| `update_state(config, values)` | 修改 checkpoint 内容，创建分叉（fork） | 改存档后读档重来 |
+
+**分叉机制：** `update_state` 之后在新的 thread_id 上 `invoke`，图从分叉点接着跑。原始分支数据不受影响，两个分支各自独立。
+
+```
+原始时间线:  用户问 → agent调工具 → 工具返回"1991年" → agent答"1991年"
+                                        ↑
+                                    在这里分叉
+                                        ↓
+分叉时间线:  用户问 → agent调工具 → 工具返回"1992年" → agent答"1992年"
+```
+
+#### 手写 vs LangGraph Checkpoint
+
+| 能力 | 手写 Agent 循环 | LangGraph Checkpoint |
+|------|-----------|------------|
+| 状态持久化 | ❌ 需手动序列化 | ✅ SqliteSaver 自动 |
+| 暂停等人审批 | ❌ 做不到 | ✅ interrupt() 原生 |
+| 回到任意历史状态 | ❌ 只能保存最终结果 | ✅ get_state 任意回溯 |
+| 修改历史后重跑 | ❌ 需手动构造输入 | ✅ update_state 分叉 |
+
+**面试一句话：** 手写 Agent 循环能做到"调工具→看结果→再调"，但做不到"暂停→恢复"和"时间旅行"。这就是生产环境用 LangGraph 而不是自己写 while True 的原因。
+
+| 来源 | W5D4 |
+
+---
+
+## [[Skills vs Tools]]（W5D5）
+
+> Tool 是螺丝刀，Skill 是工具箱（prompt + tools + 流程 + 测试打包在一起）。
+
+### 核心对比
+
+| | Tool（Day 2） | Skill（Day 5） |
+|------|-----------|------------|
+| 组成部分 | 一个函数 + description | prompt + tools + 输入输出 schema + 测试用例 |
+| system prompt | 全局通用，"万金油" | 专用 prompt，精准描述本 Skill 的职责 |
+| 加新能力 | 改全局 prompt + 往 TOOLS 列表追加 | 新增一个 Skill 对象，不动已有 Skill |
+| 工具集大小 | 全部工具混在一起，LLM 从 30 个里选 | 每个 Skill 只有 2-5 个相关工具，选择更准 |
+| 可测试性 | 只能端到端测整个 Agent | 每个 Skill 自带 test_cases，独立验证 |
+| 切思维模式 | 靠 prompt 里写"如果是代码问题就..." | 切 Skill = 切 prompt + 切工具集，思维模式自动切换 |
+
+### Skill 的五要素
+
+1. **name + description** — 告诉调度者"我能做什么"
+2. **system_prompt** — 告诉 LLM "在这个 Skill 里你怎么干活"
+3. **tools** — 这个 Skill 专属的工具函数（精简，只放相关的）
+4. **input_schema** — 触发条件（关键词/embedding 相似度）
+5. **test_cases** — 独立于 Agent 的单元测试
+
+### 调度层
+
+多 Skill 时需要调度器（router）：用户意图 → 匹配 Skill → 用 Skill 的 prompt + tools 执行。
+
+- 简单版：关键词匹配（trigger_keywords）
+- 生产版：embedding 相似度 或 LLM 路由
+
+**不用调度层的代价：** 所有工具塞一个全局 prompt → prompt 变成万能废话 → 工具列表太长 LLM 选不准。
+
+### 面试金句
+
+> "我们的 Agent 不是直接管 30 个工具，而是按业务域拆成 Skill——每个 Skill 是 prompt + tools + schema 的封装。调度层按意图路由到 Skill，Skill 内部用专用 prompt 执行。这样的好处是：加能力不动已有 Skill、每个 Skill 独立可测、切 Skill 切思维模式。"
+
+### 和 LangGraph 的关系
+
+Skill 是**组织工具的方式**，LangGraph 是**执行工具的引擎**。两者不冲突——可以把一个 Skill 的工具列表直接喂给 LangGraph 的 ToolNode：
+
+```python
+# Day 2: 松散工具 → ToolNode
+TOOLS = [search_knowledge, calculate]
+graph.add_node("tools", ToolNode(TOOLS))
+
+# Day 5: Skill 的工具 → ToolNode
+graph.add_node("tools", ToolNode(knowledge_skill.tool_map.values()))
+```
+
+| 来源 | W5D5 |
+
+---
+
+## [[Mermaid 架构图]]
+
+> 用 Mermaid 画架构图是面试加分项——能画出来说明真理解。
+
+### 学习路径技术栈全景图
+
+```mermaid
+graph TD
+    subgraph 基础层["基础层"]
+        PY[Python<br/>函数/数据结构/JSON]
+        GIT[Git 基础]
+    end
+
+    subgraph LLM层["LLM 层"]
+        API[OpenAI 兼容 API]
+        DS[DeepSeek V4]
+        QW[Qwen 千问]
+        CL[Claude API]
+        API --> DS
+        API --> QW
+        API --> CL
+    end
+
+    subgraph 框架层["框架层"]
+        ST[Streamlit<br/>UI 快速原型]
+        LC[LangChain<br/>消息/工具封装]
+        LI[LlamaIndex<br/>RAG 框架]
+        CD[ChromaDB<br/>向量数据库]
+    end
+
+    subgraph Agent层["Agent 层"]
+        LG[LangGraph<br/>状态图引擎]
+        AG[Agent 工作流<br/>ReAct / Plan-Exec / Reflexion]
+        SK[Skill 封装<br/>prompt + tools + 测试]
+        LG --> AG
+        AG --> SK
+    end
+
+    subgraph 工程化层["工程化层"]
+        MCP[MCP 协议<br/>工具连接标准]
+        LF[LangFuse<br/>可观测性]
+        EV[评测体系<br/>固定测试集 + 指标]
+        DK[Docker<br/>容器化部署]
+    end
+
+    subgraph 产出层["产出层"]
+        PRJ[产品化项目<br/>ecommerce-rag]
+        INT[面试讲述词<br/>项目故事 + 技术认知]
+    end
+
+    PY --> ST
+    PY --> LC
+    PY --> LI
+    API --> LI
+    API --> AG
+    LC --> LG
+    LI --> CD
+    ST --> PRJ
+    AG --> PRJ
+    MCP --> AG
+    LF --> PRJ
+    EV --> PRJ
+    DK --> PRJ
+    PRJ --> INT
+```
+
+### Agent Loop 全链路
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant A as Agent
+    participant LLM as LLM API
+    participant T as 工具/Skill
+
+    U->>A: 提问
+    loop Agent Loop
+        A->>LLM: messages + tools
+        LLM-->>A: tool_calls 或 文本回答
+        alt 有 tool_calls
+            A->>T: 执行工具
+            T-->>A: 工具结果
+            A->>A: 追加到 messages
+        else 无 tool_calls
+            A->>U: 返回最终答案
+        end
+    end
+```
+
+| 来源 | W5D5 |
+
+---
+
+## [[MCP 协议]]（W5D6）
+
+> MCP（Model Context Protocol）= Agent 的 USB 接口——一个标准协议对接所有工具。
+
+### 核心架构
+
+```
+┌──────────────┐    stdio JSON-RPC    ┌──────────────────┐
+│  MCP Client  │ ◄──────────────────► │   MCP Server     │
+│  (Agent)     │    stdin/stdout      │   (工具提供者)    │
+│              │                      │                  │
+│  list_tools()│ ──────────────────► │  tool 函数       │
+│  call_tool() │ ◄────────────────── │                  │
+└──────────────┘                      └──────────────────┘
+```
+
+三个角色：
+- **Server**：暴露工具，处理 JSON-RPC 请求，返回结果
+- **Client**：连接 Server，发现工具，调用工具
+- **Transport**：通信方式——stdio（子进程 stdin/stdout）或 SSE（HTTP 长连接）
+
+### 和直接 import 的区别
+
+| | Day 2 直接 import | Day 6 MCP 协议 |
+|------|-----------|------------|
+| 工具在哪 | 同一个 Python 进程 | 独立进程（甚至不同语言、不同机器） |
+| 怎么知道有什么工具 | 代码里写死的 TOOLS 列表 | `list_tools()` 动态发现 |
+| 怎么调用 | `search_knowledge("RAG")` | `await client.call_tool("search_knowledge", {"query": "RAG"})` |
+| 换工具实现 | 改 Agent 代码 | 换 Server，Agent 代码不动 |
+| 一个 Agent 连多个源 | 需要全部 import | 连多个 MCP Server，各自独立 |
+
+### MCP 四步流程
+
+1. **建立连接**：Client 启动 Server 子进程，通过 stdio 建立双向通信
+2. **协议握手**：`session.initialize()` 交换协议版本和能力
+3. **发现工具**：`list_tools()` 拿到 Server 暴露的工具名 + schema
+4. **调用工具**：`call_tool("工具名", {参数})` 执行并拿到结果
+
+### MCP + Skill + LangGraph 三者关系
+
+```
+Skill（组织层）    → "怎么把工具分组管理"（prompt + tools + 测试）
+MCP（通信层）      → "工具怎么被 Agent 调用"（JSON-RPC 跨进程）
+LangGraph（执行层） → "Agent 工作流怎么编排"（图引擎）
+
+三者不冲突：
+  Skill 的工具 → 通过 MCP Server 暴露 → Agent 通过 MCP Client 调用 → LangGraph 编排工作流
+```
+
+### 面试金句
+
+> "MCP 就像 Agent 的 USB 接口——不管工具用什么语言实现、跑在什么进程里，Agent 通过统一的 JSON-RPC 协议发现和调用。一个 Agent 可以同时连接多个 MCP Server，换工具实现不需要改 Agent 代码。"
+
+| 来源 | W5D6 |
+
+---
+
+## [[MCP + LangGraph 集成]]（W5D7）
+
+> 把 MCP Server 的工具接入 LangGraph Agent，对比本地工具 vs 远程工具。
+
+### 核心问题
+
+LangGraph 的 `ToolNode` 要吃 `@tool` 装饰的函数（同步或 async），但 MCP 工具是通过 `await session.call_tool()` 远程调用的。需要一个**适配层**桥接两者。
+
+### 适配层三步
+
+```
+MCP Server 工具  →  [适配层]  →  LangChain StructuredTool  →  ToolNode  →  Agent
+                       │
+         1. list_tools() 动态发现
+         2. create_model() 动态生成 args_schema（Pydantic）
+         3. coroutine 包装 MCP call_tool
+```
+
+1. **动态发现**：`await session.list_tools()` 拿到 Server 的工具名 + description + 参数 schema
+2. **创建 schema**：用 `create_model()` 为每个工具动态生成 Pydantic args_schema（如 search_knowledge → `Input(query: str)`）
+3. **包装 coroutine**：用默认参数捕获 tool_name + param_names → async function → `StructuredTool.from_function(coroutine=...)`
+
+### Day 2 vs Day 7 对照
+
+| | Day 2（本地工具） | Day 7（MCP 远程） |
+|------|-----------|------------|
+| 工具在哪 | 同进程 Python 函数 | 独立进程，JSON-RPC 通信 |
+| 工具怎么来 | `@tool` 装饰器手写 | `list_tools()` 动态发现 + 适配 |
+| 工具调用 | 直接函数调用（同步） | `await session.call_tool()`（async） |
+| 图执行 | `graph.stream()` | `graph.astream()` |
+| 图拓扑 | agent ↔ tools | agent ↔ tools（完全相同） |
+| 换工具实现 | 改 Agent 代码 | 换 Server，Agent 代码不动 |
+
+### 多 MCP Server 连接
+
+一个 Agent 可以同时连多个 MCP Server：
+```python
+for server in [knowledge_server, db_server, api_server]:
+    tools_raw = await session.list_tools()
+    all_tools += build_mcp_langchain_tools(session, tools_raw)
+
+graph = build_react_graph(all_tools)  # 一个 ToolNode 管所有工具
+```
+
+Agent 不关心工具来自哪个 Server——它只看到一个统一的工具列表。
+
+### 面试金句
+
+> "我们的 Agent 通过 MCP 协议对接工具，适配层把 MCP 的 async call_tool 包装成 LangChain StructuredTool。Agent 代码和图拓扑完全不变，换工具实现只需换 MCP Server，不用改 Agent 代码。一个 Agent 可以同时连多个 Server。"
+
+| 来源 | W5D7 |

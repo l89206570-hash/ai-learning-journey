@@ -4,16 +4,16 @@ tags:
   - ai-learning
   - weekly-log
 created: 2026-05-21
-updated: 2026-06-08
+updated: 2026-06-09
 ---
 
 # AI 应用开发学习进度
 
 ## 当前状态
-- **当前周：** 🟢 W5（Day 1-3 完成）
+- **当前周：** 🟢 W5（Day 1-4 完成）
 - **开始日期：** 2026-05-21
-- **今日日期：** 2026-06-08
-- **状态：** W5 Day 3 完成 → 下次继续 W5 Day 4（Checkpoint 深入）
+- **今日日期：** 2026-06-09
+- **状态：** W5 Day 7 完成 → 下次继续 W6 Day 1（Claude Code 架构拆解）
 - **学习方案：** W5-W7 修订方案见 `E:\.claude\plans\mutable-doodling-wolf.md`
 - **战略调整：** 目标收窄为「AI + 业务场景」型公司（跨境电商/出海/外贸），核心卖点 = 懂 AI + 能落地业务，不和纯程序员比工程底子。详情见 memory/career-strategy-shift.md。
 - **特殊：** MiMo-V2.5-Pro Token Plan 激活（5/23 → 6/23），已接入 Codex Desktop
@@ -75,12 +75,19 @@ updated: 2026-06-08
 - ✅ Day 1 完成：Agent 三范式对比 — ReAct / Plan-then-Execute（方式 B+C）/ Reflexion 纯 API 实现，同一任务对比三种范式差异
 - ✅ Day 2 完成：LangGraph 重构 ReAct — StateGraph + ToolNode + tools_condition + checkpoint，对比手写 vs 框架的代码量差异
 - ✅ Day 3 完成：LangGraph 实现 Plan-Execute + Reflexion — 三张图拓扑对比，自定义 router 替代 tools_condition，验证"图拓扑不同=范式不同"
+- ✅ Day 4 完成：Checkpoint 深入 — SqliteSaver 持久化、interrupt() 暂停审批、get_state/update_state 时间旅行，理解 LangGraph 和手写的代差
+- ✅ Day 5 完成：Skills vs Tools + Mermaid — 将 Day 2 零散工具封装为 Skill（prompt + tools + 测试），多 Skill 调度路由，Mermaid 架构图（ReAct 图/三范式对比/技术栈全景/Agent Loop 时序）
+- ✅ Day 6 完成：MCP 协议入门 — FastMCP Server（3 个工具）+ Client（stdio transport + list_tools 动态发现 + call_tool），对比三种集成方式（import/Skill/MCP）
+- ✅ Day 7 完成：MCP + LangGraph 集成 — 适配层（list_tools → create_model → coroutine 包装），async StructuredTool + graph.astream()，Agent 通过 MCP 协议调用远程工具，图拓扑不变
 
 ## 遇到的困难（W5）
 - Day 1: `plan_text.count("步骤")` 多数了步数 → 计划文本说明文字也含"步骤"，导致多跑空轮次
 - Day 1: Reflexion 反思提示缩进错（放在 for 循环里面而不是两个 for 之间）→ 每轮 tool_call 后都触发反思
 - Day 1: 伪代码 `[...]` 和 `...` 当真实代码 → Python 不认，要用实际变量
 - Day 1: `response.choices[0].message` 拿了整个对象而不是 `.content` → 格式不对
+- Day 4: `langgraph.checkpoint.sqlite` 模块不存在 → LangGraph 1.x 把 checkpoint 拆成独立包，需 `pip install langgraph-checkpoint-sqlite`
+- Day 4: `interrupt()` 不抛异常，`invoke()` 正常返回带 `__interrupt__` → 不能 try/except，要检查 `"__interrupt__" in result`
+- Day 4: 拒绝 tool_calls 后 `add_messages` append 导致 tool_calls 消息孤立 → DeepSeek 要求 tool_calls 后必须有匹配 tool message，需 `RemoveMessage` 删除原消息
 
 ## 产品化冲刺 ✅ 完成（2026-06-05，1 天）
 
@@ -146,6 +153,7 @@ updated: 2026-06-08
 | W5 | paradigm-comparison.md（三范式实测对比分析） | projects/w5-agent-paradigms/paradigm-comparison.md |
 | W5 | day2_langgraph_react.py（LangGraph 重构 ReAct — StateGraph + ToolNode + checkpoint） | projects/w5-agent-paradigms/day2_langgraph_react.py |
 | W5 | day3_langgraph_paradigms.py（LangGraph Plan-Execute + Reflexion — 三图拓扑对比） | projects/w5-agent-paradigms/day3_langgraph_paradigms.py |
+| W5 | day4_checkpoint_demo.py（Checkpoint 深入 — SqliteSaver + interrupt + 时间旅行） | projects/w5-agent-paradigms/day4_checkpoint_demo.py |
 | PRD | 电商客服 RAG 产品化 — 完整产品级项目（config/logging/Docker/测试） | projects/ecommerce-rag/app.py |
 
 ## 收入记录
