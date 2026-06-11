@@ -4,11 +4,11 @@ tags:
   - ai-learning
   - reference
 created: 2026-05-22
-updated: 2026-06-09
+updated: 2026-06-11
 ---
 
 # AI 学习资源库
-> 自动维护，每周更新 | 最后更新: 2026-06-09
+> 自动维护，每周更新 | 最后更新: 2026-06-11
 
 ## 当前推荐学习（按优先级排序）
 1. [Agent Learning Hub](https://github.com/datawhalechina/Agent-Learning-Hub) — Datawhale 系统性 AI Agent 路线图 + 11 级项目阶梯，适合 W4-W10
@@ -20,7 +20,17 @@ updated: 2026-06-09
 7. [CrewAI](https://github.com/crewAIInc/crewAI) — 最快上手 Multi-Agent，适合 W10
 8. [Superpowers](https://github.com/obra/superpowers) — Agent 行为层，强制设计门+计划+微任务 TDD，防 Agent 跳过设计直接写代码，适合 W5+
 
-## 最近动态（2026-06-09 扫描）
+## 最近动态（2026-06-11 中周扫描）
+
+**AI 行业重大新闻：** Anthropic 以 $9650 亿估值申请 IPO，年化收入超 $470 亿，Claude 编写自身 80%+ 代码。同时呼吁全球暂停高级 AI 开发（递归自我改进失控风险）。SpaceX 签约 Google（$92 亿/月）和 Anthropic（$125 亿/月）GPU 计算租赁，总合同超 $7000 亿。OpenAI 将 ChatGPT 转型为"超级应用"（集成编码工具+AI Agent）。Nvidia RTX Spark "PC Superchip" Computex 发布，将 AI 处理带入笔记本。特朗普签署行政令要求 AI 模型接受联邦安全测试（发布前最长 30 天审查）。《大美国 AI 法案》（269 页）引入全面联邦 AI 框架，冻结州级 AI 法律 3 年。
+
+**CrewAI v1.14.7a2（6月5日）：** 新增 Conversational Flow Tracing、Chat API、更丰富的 LLM 事件（finish_reason/sampling/response.id）、Flow DSL 重构、可覆盖 Locking Backend。Stars → 51.6K（+3.8K）。项目处于高速迭代期（领先上次稳定版 152 commits）。
+
+**LlamaIndex v0.14.22（5月14日）：** 新增多模态合成、GPT-5.5 支持、Claude Opus 4.7 支持。重新定位为"领先的文档 Agent 和 OCR 平台"，2026 重点方向是"长周期文档 Agent"。Stars → 49.5K（+3.5K）。
+
+**LangChain：** langchain-core 1.4.1、langchain 1.3.6，常规迭代，修复 Bedrock 预验证、stream assembly v3 改进、安全依赖升级（pygments CVE 修复）。无架构级变化。
+
+### 2026-06-09 扫描（本周一）
 
 **GitHub 2026 趋势确认：** Dify 143K stars 领跑全平台，Hermes Agent 150K（自学习个人 AI）、OpenHands 60.5K（自主编程 Agent）、MetaGPT 59.6K（多 Agent 模拟软件公司）、OpenCode 55K（模型无关编程 Agent）、Cline 49K（VS Code 原生 Agent）。Rust 开始进入 Agent 框架（推理速度 3.8x Python），上下文压缩层（Headroom）成为新基建。
 
@@ -46,10 +56,10 @@ updated: 2026-06-09
 | RAGFlow | 40K+ | 生产级 RAG 架构参考，企业级设计 | W4-W7 | 2026-05-20 |
 | awesome-ai-agents-2026 | — | 2026 Agent 生态全景，选型必看 | W6 | 2026-05-20 |
 | Dify | 143K+ | LLM 应用产品化最佳参考，2026 年增长迅猛 | W8 | 2026-05-20 |
-| CrewAI | 47.8K+ | 最快上手多 Agent 协作 | W10 | 2026-05-20 |
+| CrewAI | 51.6K+ | 最快上手多 Agent 协作 | W10 | 2026-05-20 |
 | Agent Learning Hub | — | Datawhale 系统性 AI Agent 学习路线图 + 11 级项目阶梯 | W4-W10 | 2026-05-22 |
 | LangGraph | 10K+ | 复杂状态ful Agent 工作流 | W6-W10 | 2026-05-20 |
-| LlamaIndex | 46K+ | 文档级 RAG 最强框架 | W4-W7 | 2026-05-20 |
+| LlamaIndex | 49.5K+ | 文档 Agent + OCR 平台，长周期文档 Agent 方向 | W4-W7 | 2026-05-20 |
 | OpenClaw | 302K+ | 多平台 AI Agent 网关，177+ 生产配置模板，架构设计参考 | W6-W10 | 2026-05-26 |
 | Gemini CLI | 97K+ | Google 官方开源终端 Agent，原生 MCP 支持，1M Token 上下文 | W6 | 2026-05-26 |
 | DeerFlow | 25K+ | 字节跳动开源，Planning+Tools+Memory+Execution 深度研究 Agent | W6-W10 | 2026-05-26 |
