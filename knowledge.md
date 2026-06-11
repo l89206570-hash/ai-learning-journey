@@ -7,7 +7,7 @@ tags:
   - rag
   - streamlit
 created: 2026-05-21
-updated: 2026-06-09
+updated: 2026-06-11
 ---
 
 # 知识点存档
@@ -1492,3 +1492,163 @@ Agent 不关心工具来自哪个 Server——它只看到一个统一的工具�
 > "我们的 Agent 通过 MCP 协议对接工具，适配层把 MCP 的 async call_tool 包装成 LangChain StructuredTool。Agent 代码和图拓扑完全不变，换工具实现只需换 MCP Server，不用改 Agent 代码。一个 Agent 可以同时连多个 Server。"
 
 | 来源 | W5D7 |
+
+---
+
+## [[Claude Code 架构拆解]]（W6D1）
+
+> 拆解日常使用的 Claude Code，理解 Agent Harness 的四大模块：工具注册、权限系统、状态管理、子任务。
+
+### 整体架构图
+
+```mermaid
+graph TD
+    subgraph 用户界面["用户界面"]
+        CLI[CLI / IDE / Web]
+    end
+
+    subgraph 核心引擎["核心 Agent 引擎"]
+        LOOP[Agent Loop<br/>思考→行动→观察]
+        CTX[上下文管理<br/>会话级窗口]
+    end
+
+    subgraph 工具系统["工具系统"]
+        direction TB
+        BUILTIN[内置工具<br/>Bash/Read/Write/Glob/Grep/Edit]
+        MCPTOOL[MCP 工具<br/>外部 Server 动态发现]
+        SKILL[Skills<br/>按需加载的专业能力包]
+        LOOP --> BUILTIN
+        LOOP --> MCPTOOL
+        LOOP --> SKILL
+    end
+
+    subgraph 权限中间件["权限中间件"]
+        ALLOW[allow<br/>自动放行]
+        DENY[deny<br/>直接拒绝]
+        ASK[ask<br/>弹窗等人批]
+        BUILTIN --> ALLOW
+        BUILTIN --> DENY
+        BUILTIN --> ASK
+        MCPTOOL --> ASK
+    end
+
+    subgraph 状态管理["状态管理（双层）"]
+        SESSION[会话级<br/>对话上下文 / Task List / Plan]
+        PROJECT[项目级<br/>CLAUDE.md / MEMORY.md<br/>跨会话持久化]
+        CTX --> SESSION
+        CTX --> PROJECT
+    end
+
+    subgraph 子任务系统["子任务系统"]
+        SUB[Agent 工具]
+        EXPLORE[Explore Agent<br/>代码搜索]
+        PLANAGENT[Plan Agent<br/>架构设计]
+        GENERAL[General Agent<br/>通用任务]
+        SUB --> EXPLORE
+        SUB --> PLANAGENT
+        SUB --> GENERAL
+        LOOP --> SUB
+    end
+
+    subgraph 外部集成["外部集成"]
+        MCP[MCP Servers<br/>外部工具/数据源]
+        API[LLM API<br/>Claude / Opus / Sonnet]
+        HOOKS[Hooks<br/>事件触发器]
+    end
+
+    CLI --> LOOP
+    MCPTOOL <--> MCP
+    LOOP <--> API
+    CTX --> HOOKS
+```
+
+### 模块一：工具注册系统
+
+**声明式定义，动态发现：**
+
+| 工具类型 | 发现方式 | 生命周期 | 例子 |
+|---------|---------|---------|------|
+| 内置工具 | 框架硬编码 | 始终可用 | Bash、Read、Write、Glob、Grep、Edit |
+| MCP 工具 | `list_tools()` 动态发现 | 连接时注册，断开时移除 | 用户自定义 MCP Server |
+| Skills | 按需加载 | 调用时激活，用后释放 | 安全审查、PR review |
+
+**关键设计：工具定义与执行分离。** 定义只声明"我能做什么"（name + description + parameters schema），执行时才真正调用。这和 W5D5 的 Skill 设计是同一模式——Agent 先看工具列表，决定用哪个，再调用。
+
+**热插拔：** 加新工具不需要改 Agent 代码。新增 MCP Server → Agent 自动发现 → 工具列表更新。你 W5D7 做的 `list_tools()` + `create_model()` 适配层，Claude Code 对每个 MCP Server 都做一遍。
+
+### 模块二：权限系统
+
+Claude Code 的权限系统是**中间件模式**——每次工具调用前都要过权限检查。
+
+| 级别 | 行为 | 适用场景 |
+|------|------|---------|
+| `allow` | 自动执行，不弹窗 | 只读操作（Read、Glob、Grep） |
+| `deny` | 直接拒绝，不执行 | 危险命令、敏感路径 |
+| `ask` | 弹窗等用户确认 | 写文件、网络请求、执行脚本 |
+
+**配置方式：** `settings.json` 里按工具名配置权限级别，支持通配符匹配。
+
+**和 LangGraph `interrupt()` 的关系：** 你 W5D4 学的 interrupt 是"在节点内部暂停"，Claude Code 的 ask 是"在工具调用前暂停"。两者都是 Human-in-the-Loop，但粒度不同——interrupt 控制图节点，ask 控制工具。
+
+**设计要点：**
+- 只读操作默认 allow——减少打扰，保持流畅
+- 破坏性操作默认 ask——防止不可逆操作
+- MCP 外来工具默认 ask——不信任外部工具
+
+### 模块三：状态管理（双层架构）
+
+Agent 的状态不能全部丢进上下文窗口——又贵又慢。Claude Code 的分层方案：
+
+| 层级 | 存储位置 | 生命周期 | 存什么 |
+|------|---------|---------|--------|
+| **会话级** | 上下文窗口 | 单次对话 | messages、工具调用历史、当前任务 |
+| **会话内持久** | Task List / Plan 文件 | 本次会话 | 任务进度、实施计划 |
+| **项目级** | CLAUDE.md / MEMORY.md | 跨会话 | 项目规范、用户偏好、历史决策 |
+
+**Memory 系统的四种类型：**
+
+| 类型 | 存什么 | 何时更新 |
+|------|--------|---------|
+| `user` | 用户角色、偏好、知识背景 | 了解用户时 |
+| `feedback` | 行为规则（做什么/不做什么） | 用户纠正或确认时 |
+| `project` | 项目目标、决策、约束 | 项目状态变化时 |
+| `reference` | 外部资源指针 | 发现新信息源时 |
+
+**和 LangGraph Checkpoint 的关系：** Claude Code 的会话状态 ≈ LangGraph 的 `SqliteSaver` checkpoint——都是"暂停后能恢复"。区别是 Claude Code 还多了项目级状态（CLAUDE.md），这是 LangGraph 没有的概念层。
+
+### 模块四：子任务系统
+
+Claude Code 遇到大任务时不自己硬抗，而是 **spawn subagent**：
+
+| Agent 类型 | 专长 | 工具集 |
+|-----------|------|--------|
+| **Explore** | 代码搜索、文件定位 | Glob、Grep、Read |
+| **Plan** | 架构设计、方案规划 | 全部工具（只读） |
+| **General** | 通用编程任务 | 全部工具 |
+| **claude-code-guide** | Claude Code 使用问答 | WebSearch、WebFetch |
+
+**四个关键设计决策：**
+
+1. **独立上下文**：子 Agent 有自己的上下文窗口，不污染主 Agent。完成后只返回摘要。
+2. **类型化**：不同任务匹配不同类型的子 Agent。搜索任务给 Explore（快、只读），设计任务给 Plan（慢、深度）。
+3. **后台运行**：子 Agent 可以异步执行，主对话继续。你不需要盯着它跑完。
+4. **Worktree 隔离**：代码修改类子任务在 git worktree 里跑，不影响当前工作区。出问题直接删 worktree。
+
+### W5 已学内容对接表
+
+Claude Code 架构里的每个概念你都在 W5 亲手做过：
+
+| Claude Code 模块 | 你 W5 对应的实践 | 关系 |
+|-----------------|-----------------|------|
+| 工具注册 | W5D2 `@tool` 装饰器 + `ToolNode` | 手写版；Claude Code 做得更自动化 |
+| MCP 动态发现 | W5D6-D7 `list_tools()` + 适配层 | 你做的适配层，Claude Code 对每个 Server 都做 |
+| Skills 系统 | W5D5 Skill 五要素封装 | 同一设计模式——prompt + tools + 测试打包 |
+| 权限系统 | W5D4 `interrupt()` 暂停等人批 | granularity 不同：interrupt 控节点，ask 控工具 |
+| 状态持久化 | W5D4 `SqliteSaver` checkpoint | 同一思路；Claude Code 多了项目级 MEMORY.md |
+| 子任务 | —（W10 CrewAI 会涉及） | 多 Agent 协调的前置概念 |
+
+### 面试金句
+
+> "我拆解了 Claude Code 的架构设计。它有四个核心模块：声明式工具注册系统支持热插拔 MCP 工具；权限中间件对每次工具调用做 allow/deny/ask 三级检查；状态管理分会话级和项目级两层——短期的上下文窗口加长期的 MEMORY.md；子任务系统把大任务 spawn 给独立上下文的类型化 Agent。这些设计我在自己的 LangGraph Agent 项目里都做了对应的实践。"
+
+| 来源 | W6D1 |

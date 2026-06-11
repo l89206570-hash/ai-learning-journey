@@ -10,10 +10,10 @@ updated: 2026-06-09
 # AI 应用开发学习进度
 
 ## 当前状态
-- **当前周：** 🟢 W5（Day 1-4 完成）
+- **当前周：** 🟢 W6（Day 1 完成）
 - **开始日期：** 2026-05-21
-- **今日日期：** 2026-06-09
-- **状态：** W5 Day 7 完成 → 下次继续 W6 Day 1（Claude Code 架构拆解）
+- **今日日期：** 2026-06-11
+- **状态：** W6 Day 1 完成 → 下次继续 W6 Day 2-3（评测体系 + pytest）
 - **学习方案：** W5-W7 修订方案见 `E:\.claude\plans\mutable-doodling-wolf.md`
 - **战略调整：** 目标收窄为「AI + 业务场景」型公司（跨境电商/出海/外贸），核心卖点 = 懂 AI + 能落地业务，不和纯程序员比工程底子。详情见 memory/career-strategy-shift.md。
 - **特殊：** MiMo-V2.5-Pro Token Plan 激活（5/23 → 6/23），已接入 Codex Desktop
@@ -79,6 +79,9 @@ updated: 2026-06-09
 - ✅ Day 5 完成：Skills vs Tools + Mermaid — 将 Day 2 零散工具封装为 Skill（prompt + tools + 测试），多 Skill 调度路由，Mermaid 架构图（ReAct 图/三范式对比/技术栈全景/Agent Loop 时序）
 - ✅ Day 6 完成：MCP 协议入门 — FastMCP Server（3 个工具）+ Client（stdio transport + list_tools 动态发现 + call_tool），对比三种集成方式（import/Skill/MCP）
 - ✅ Day 7 完成：MCP + LangGraph 集成 — 适配层（list_tools → create_model → coroutine 包装），async StructuredTool + graph.astream()，Agent 通过 MCP 协议调用远程工具，图拓扑不变
+
+## W6 进度（W6 — Agent 工程化 + 综合项目）
+- ✅ Day 1 完成：Claude Code 架构拆解 — 四大模块（工具注册/权限中间件/双层状态管理/子任务系统），Mermaid 架构图，与 W5 实践对接表，面试讲述词
 
 ## 遇到的困难（W5）
 - Day 1: `plan_text.count("步骤")` 多数了步数 → 计划文本说明文字也含"步骤"，导致多跑空轮次
