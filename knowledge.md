@@ -1652,3 +1652,68 @@ Claude Code 架构里的每个概念你都在 W5 亲手做过：
 > "我拆解了 Claude Code 的架构设计。它有四个核心模块：声明式工具注册系统支持热插拔 MCP 工具；权限中间件对每次工具调用做 allow/deny/ask 三级检查；状态管理分会话级和项目级两层——短期的上下文窗口加长期的 MEMORY.md；子任务系统把大任务 spawn 给独立上下文的类型化 Agent。这些设计我在自己的 LangGraph Agent 项目里都做了对应的实践。"
 
 | 来源 | W6D1 |
+
+---
+
+## [[pytest]] Agent 测试框架（W6D2）
+
+> pytest 是 Python 的自动化测试框架。Agent 测试和传统测试的区别：不能 assert 精确值（LLM 非确定性），用"宽松断言"替代。
+
+### pytest 核心机制
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| `assert` | 断言，不满足就报 FAILED。Agent 测试用 `in`/`>=` 而非 `==`，因为 LLM 输出不确定 | W6D2 |
+| `@pytest.fixture(scope="module")` | 模块级共享初始化——同一个模块里所有测试复用同一个 Agent 实例，避免每条用例都重建 | W6D2 |
+| `scope="function"` | 默认值，每条用例独立创建新实例。调 LLM 的用例会慢很多（12 条 × 重建开销） | W6D2 |
+| `scope="module"` | 所有测试共享一个实例，12 条调 LLM 的用例只有 1 次初始化 | W6D2 |
+| `@pytest.mark.parametrize("run_id", range(3))` | 同一条用例跑 3 次，每次参数不同。Agent 稳定性测试的核心——验证重复问同一个问题答案是否一致 | W6D2 |
+| `-v` | 命令行参数，显示每条用例名和通过/失败状态 | W6D2 |
+| `-s` | 不捕获 print 输出，调试用 | W6D2 |
+| `--tb=long` | 失败时显示完整 traceback | W6D2 |
+| `-x` | 第一条失败就停 | W6D2 |
+| 精确到单条运行 | `pytest tests/test_agent.py::TestToolNode::test_calculate_valid -v` 支持作用域语法 | W6D2 |
+| 类名以 `Test` 开头 | pytest 自动发现规则，不以 `Test` 开头就是个普通类，不会被识别为测试 | W6D2 |
+
+### Agent 测试三层结构
+
+| 层 | 测什么 | 调不调 LLM | 速度 |
+|------|------|:---:|------|
+| **图结构**（TestAgentStructure） | 图节点是否正确、入口是否是 agent、边的连接 | 不调 | 毫秒级 |
+| **工具逻辑**（TestToolNode） | 每个 `@tool` 的输入输出逻辑（找到/未找到/合法/非法/边界） | 不调 | 毫秒级 |
+| **Agent 行为**（TestAgentBehavior） | LLM 能否正确判断何时调工具、调哪个工具、能否根据工具结果正确回答 | 调 LLM | 秒级 |
+| **稳定性**（TestAgentStability） | 同一问题跑 3 次，答案是否都包含关键信息 | 调 LLM×3 | 秒级 |
+| **持久化**（TestMemorySaver） | 同一 thread_id 第二次调用是否记住历史对话 | 调 LLM×2 | 秒级 |
+
+**分层原因：**
+- 不调 LLM 的用例跑得快，出问题时能快速定位是代码逻辑错了还是模型行为变了
+- 调 LLM 的用例放后面——结构和工具先通过，才值得花 Token 测行为
+
+### Agent 测试关键技巧
+
+| 技巧 | 说明 |
+|------|------|
+| **宽松断言** | `assert "900" in result["answer"]` 而非 `assert result["answer"] == "900"`——LLM 可能输出"计算结果为 900"、"答案是 900"等变体 |
+| **关键词存在性检查** | `assert "RAG" in result` + `assert "检索增强生成" in result`——几条关键信息是否都有 |
+| **下限断言** | `assert result["tool_calls"] >= 2` 而非 `== 2`——模型可能多调一次但不算错误 |
+| **兜底断言** | 查不存在的概念时用 `or` 链：`assert "未找到" in answer or "不" in answer or len(answer) > 30`——多种合理回答都算通过 |
+| `tool.invoke()` 而非直接调函数 | `search_knowledge.invoke({"query": "RAG"})` 走 LangChain 工具调用标准入口，和 Agent 运行时的调用路径一致 |
+| `thread_id` 隔离 | 每条用例用不同 thread_id，避免测试之间互相污染。尤其是 MemorySaver 测试——不用独立 thread 就测不出"记不记得住" |
+| helper 封装 | `run_agent()` 把"运行 Agent → 收集指标"封装成函数，每个测试用例不需要重复写 stream/状态提取逻辑 |
+| `tool_calls == 0` 断言 | 测 Agent 在简单问题（如打招呼）上不应该调工具——防止模型滥用工具浪费 Token |
+
+### pytest 和评测脚本的区别
+
+| | pytest（Day 2） | 评测脚本（Day 3） |
+|------|-----------|------------|
+| 目的 | 代码级正确性——"能跑对" | 量化指标——"跑得怎么样" |
+| 度量 | PASS/FAIL（二值） | 关键词命中率、延迟、轮次、稳定性 CV |
+| 每次跑多少次 | 1 次（稳定性测试除外） | 每条 3 次取平均 |
+| 输出 | 测试报告（绿点/红字） | 评测报告（表格 + 指标） |
+| 使用时机 | 改代码后跑 | 改 prompt 或换模型后跑 |
+
+### 面试金句
+
+> "我给 Agent 写了 17 条 pytest 用例，分三层：图结构和工具逻辑不调 LLM（毫秒级验证代码正确性），Agent 行为和稳定性调 LLM（验证模型能否正确使用工具）。断言用关键词存在性检查而非精确匹配——因为 LLM 输出是非确定性的。每次改 prompt 或换模型后跑一遍，确保不会改坏。"
+
+| 来源 | W6D2 |
