@@ -17,21 +17,15 @@ import streamlit as st
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 
-from config import (
-    LLM_MODEL, LLM_API_KEY, LLM_API_BASE, LLM_MAX_TOKENS, LLM_TEMPERATURE,
-    MCP_SERVER_SCRIPT,
-)
+from config import MCP_SERVER_SCRIPT
 from agent_graph import build_mcp_langchain_tools, build_react_graph, SYSTEM_PROMPT
 
 from mcp.client.session import ClientSession
 from mcp.client.stdio import stdio_client, StdioServerParameters
-from openai import OpenAI
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
-
-llm_client = OpenAI(api_key=LLM_API_KEY, base_url=LLM_API_BASE)
 
 
 # ============================================================
@@ -39,33 +33,48 @@ llm_client = OpenAI(api_key=LLM_API_KEY, base_url=LLM_API_BASE)
 # ============================================================
 
 class AgentManager:
-    """管理 MCP 连接和 Agent 图的生命周期"""
+    """管理 MCP 连接和 Agent 图的生命周期
+
+    使用 AsyncExitStack 管理 async context manager 的生命周期，
+    避免直接调用 __aenter__() 导致的 anyio cancel scope 问题。
+    """
 
     def __init__(self):
         self._loop = asyncio.new_event_loop()
         self._ready = False
         self._graph = None
         self._session = None
-        self._read_stream = None
-        self._write_stream = None
+        self._exit_stack = None
 
         self._thread = threading.Thread(target=self._run_loop, daemon=True)
         self._thread.start()
 
-        # 等待初始化完成
         future = asyncio.run_coroutine_threadsafe(self._init(), self._loop)
-        future.result(timeout=60)
-        self._ready = True
+        try:
+            future.result(timeout=120)
+            self._ready = True
+        except Exception as e:
+            logger.error("AgentManager init failed: %s", e)
+            raise
 
     def _run_loop(self):
         asyncio.set_event_loop(self._loop)
         self._loop.run_forever()
 
     async def _init(self):
+        from contextlib import AsyncExitStack
+
+        self._exit_stack = AsyncExitStack()
+
         logger.info("Starting MCP Server: %s", MCP_SERVER_SCRIPT)
         server_params = StdioServerParameters(command="python", args=[MCP_SERVER_SCRIPT])
-        self._read_stream, self._write_stream = await stdio_client(server_params).__aenter__()
-        self._session = await ClientSession(self._read_stream, self._write_stream).__aenter__()
+
+        read_stream, write_stream = await self._exit_stack.enter_async_context(
+            stdio_client(server_params)
+        )
+        self._session = await self._exit_stack.enter_async_context(
+            ClientSession(read_stream, write_stream)
+        )
         await self._session.initialize()
         logger.info("MCP Server connected")
 
@@ -104,30 +113,15 @@ class AgentManager:
         last_msg = final_state.values["messages"][-1]
         return last_msg.content if hasattr(last_msg, "content") else str(last_msg)
 
-    def query_stream(self, user_query: str, thread_id: str, history: list = None):
-        """流式查询，yield 每一步事件"""
-        future = asyncio.run_coroutine_threadsafe(
-            self._stream_events(user_query, thread_id, history), self._loop
-        )
-        while True:
-            try:
-                event = future.result(timeout=0.1)
-                if event is None:
-                    break
-                yield event
-            except asyncio.TimeoutError:
-                # 超时等待下一个事件
-                import time
-                time.sleep(0.1)
-            except StopIteration:
-                break
-
-    async def _stream_events(self, user_query, thread_id, history):
-        # 简化版：直接返回最终结果
-        result = await self._query_async(user_query, thread_id, history)
-        return result
-
     def shutdown(self):
+        async def _cleanup():
+            if self._exit_stack:
+                await self._exit_stack.aclose()
+        future = asyncio.run_coroutine_threadsafe(_cleanup(), self._loop)
+        try:
+            future.result(timeout=10)
+        except Exception:
+            pass
         self._loop.call_soon_threadsafe(self._loop.stop)
 
 

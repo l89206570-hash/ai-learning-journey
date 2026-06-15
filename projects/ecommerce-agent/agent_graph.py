@@ -19,7 +19,7 @@ from typing import Annotated
 from typing_extensions import TypedDict
 from dotenv import load_dotenv
 
-from langgraph.graph import StateGraph, END
+from langgraph.graph import StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.checkpoint.memory import MemorySaver
@@ -172,28 +172,6 @@ async def run_agent_async(graph, user_query: str, thread_id: str) -> str:
     final_state = await graph.aget_state(config)
     last_msg = final_state.values["messages"][-1]
     return last_msg.content if hasattr(last_msg, "content") else str(last_msg)
-
-
-async def run_agent_stream(graph, user_query: str, thread_id: str, history: list = None):
-    """用 astream 运行 Agent，yield 每一步事件（供 Streamlit 流式展示）"""
-    messages = [SystemMessage(content=SYSTEM_PROMPT)]
-    if history:
-        for h in history:
-            if h["role"] == "user":
-                messages.append(HumanMessage(content=h["content"]))
-            elif h["role"] == "assistant":
-                messages.append(AIMessage(content=h["content"]))
-    messages.append(HumanMessage(content=user_query))
-
-    initial_state = {"messages": messages}
-    config = {"configurable": {"thread_id": thread_id}}
-
-    async for event in graph.astream(initial_state, config):
-        yield event
-
-    final_state = await graph.aget_state(config)
-    last_msg = final_state.values["messages"][-1]
-    yield {"__final__": last_msg.content if hasattr(last_msg, "content") else str(last_msg)}
 
 
 # ============================================================
