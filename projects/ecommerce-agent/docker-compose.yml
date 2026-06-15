@@ -1,0 +1,36 @@
+services:
+  # ============================================================
+  # 建索引 — 运行一次后自动退出
+  # docker compose run --rm build_index
+  # ============================================================
+  build_index:
+    build: .
+    image: ecommerce-agent:latest
+    command: python build_index.py
+    environment:
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+    volumes:
+      - chroma_data:/app/chroma_store_ecommerce
+      - modelscope_cache:/root/.cache/modelscope
+
+  # ============================================================
+  # Streamlit 应用（含 MCP Server + LangGraph Agent）
+  # docker compose up app
+  # ============================================================
+  app:
+    build: .
+    image: ecommerce-agent:latest
+    ports:
+      - "8501:8501"
+    environment:
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+    volumes:
+      - chroma_data:/app/chroma_store_ecommerce
+      - modelscope_cache:/root/.cache/modelscope
+    depends_on:
+      build_index:
+        condition: service_completed_successfully
+
+volumes:
+  chroma_data:
+  modelscope_cache:

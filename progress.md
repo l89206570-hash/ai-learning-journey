@@ -10,10 +10,10 @@ updated: 2026-06-09
 # AI 应用开发学习进度
 
 ## 当前状态
-- **当前周：** 🟢 W6（Day 1 完成）
+- **当前周：** 🟢 W6（Day 4-6 完成）
 - **开始日期：** 2026-05-21
-- **今日日期：** 2026-06-11
-- **状态：** W6 Day 1 完成 → 下次继续 W6 Day 2-3（评测体系 + pytest）
+- **今日日期：** 2026-06-15
+- **状态：** W6 Day 4-6 完成 → 下次继续 W6 Day 7（可观测性基础）
 - **学习方案：** W5-W7 修订方案见 `E:\.claude\plans\mutable-doodling-wolf.md`
 - **战略调整：** 目标收窄为「AI + 业务场景」型公司（跨境电商/出海/外贸），核心卖点 = 懂 AI + 能落地业务，不和纯程序员比工程底子。详情见 memory/career-strategy-shift.md。
 - **特殊：** MiMo-V2.5-Pro Token Plan 激活（5/23 → 6/23），已接入 Codex Desktop
@@ -82,6 +82,8 @@ updated: 2026-06-09
 
 ## W6 进度（W6 — Agent 工程化 + 综合项目）
 - ✅ Day 1 完成：Claude Code 架构拆解 — 四大模块（工具注册/权限中间件/双层状态管理/子任务系统），Mermaid 架构图，与 W5 实践对接表，面试讲述词
+- ✅ Day 2-3 完成：Agent 测试框架 + 评测体系 — pytest 三层测试（结构/工具/行为/稳定性/持久化）+ 评测脚本（正确性×效率×稳定性）
+- 🔲 Day 4-6 完成：跨境电商 Agent 综合项目 — LangGraph + MCP Server + ChromaDB，Agent 自主决定工具调用（搜索/查订单/查会员），pytest 7/7 通过，评测 5/5 工具选择
 
 ## 遇到的困难（W5）
 - Day 1: `plan_text.count("步骤")` 多数了步数 → 计划文本说明文字也含"步骤"，导致多跑空轮次
@@ -152,6 +154,7 @@ updated: 2026-06-09
 | F3 | fund_json.py（JSON & 序列化 — dumps/loads/dump/load/API 模拟） | projects/exercise/fund_json.py |
 | F4-1 | Docker 镜像与容器 — Dockerfile、build/run/logs/exec、层缓存、.dockerignore（产品化冲刺完成） | projects/ecommerce-rag/ |
 | F4-2 | Docker 多容器编排 — docker-compose、网络、volume、环境变量、depends_on（产品化冲刺完成） | projects/ecommerce-rag/ |
+| W6 | ecommerce-agent（跨境电商 Agent — LangGraph + MCP Server + ChromaDB + pytest） | projects/ecommerce-agent/ |
 | W5 | day1_three_paradigms.py（Agent 三范式对比 — ReAct + Plan-Execute B/C + Reflexion） | projects/w5-agent-paradigms/day1_three_paradigms.py |
 | W5 | paradigm-comparison.md（三范式实测对比分析） | projects/w5-agent-paradigms/paradigm-comparison.md |
 | W5 | day2_langgraph_react.py（LangGraph 重构 ReAct — StateGraph + ToolNode + checkpoint） | projects/w5-agent-paradigms/day2_langgraph_react.py |
