@@ -7,7 +7,7 @@ tags:
   - rag
   - streamlit
 created: 2026-05-21
-updated: 2026-06-11
+updated: 2026-06-15
 ---
 
 # 知识点存档
@@ -1717,3 +1717,61 @@ Claude Code 架构里的每个概念你都在 W5 亲手做过：
 > "我给 Agent 写了 17 条 pytest 用例，分三层：图结构和工具逻辑不调 LLM（毫秒级验证代码正确性），Agent 行为和稳定性调 LLM（验证模型能否正确使用工具）。断言用关键词存在性检查而非精确匹配——因为 LLM 输出是非确定性的。每次改 prompt 或换模型后跑一遍，确保不会改坏。"
 
 | 来源 | W6D2 |
+
+---
+
+## [[跨境电商 Agent 综合项目]]（W6D4-6）
+
+> 将 ecommerce-rag 升级为 Agent 版：LangGraph 编排 + MCP Server 暴露业务工具 + ChromaDB 检索。Agent 从"朗读器"变成"调度员"。
+
+### RAG vs Agent 对比
+
+| | ecommerce-rag（W4D7） | ecommerce-agent（W6D4-6） |
+|------|------|------|
+| 编排方式 | LlamaIndex `chat_engine` | LangGraph ReAct Agent |
+| 决策权 | LLM 只润色检索结果 | Agent 判断该搜知识库/查订单/查会员 |
+| 工具来源 | 无工具概念 | MCP Server 独立进程，3 个业务工具 |
+| 扩展性 | 加能力要改 `app.py` | 加工具只改 MCP Server，Agent 图不用动 |
+
+### 核心架构
+
+```
+Streamlit UI
+  → AgentManager（后台线程 + asyncio event loop）
+    → LangGraph ReAct Agent（agent ↔ tools 拓扑）
+      → MCP 适配层（list_tools → create_model → coroutine 包装）
+        → MCP Server（stdio JSON-RPC，独立进程）
+          ├─ search_knowledge(query, category) → ChromaDB + LlamaIndex
+          ├─ check_order_status(order_id)      → 模拟订单数据
+          └─ check_membership(member_level)    → 会员权益查询
+```
+
+### 关键认知
+
+| 概念 | 要点 | 来源 |
+|------|------|------|
+| MCP Server 持有真实资源 | W5D6 的知识库是 dict，本项目的 MCP Server 加载 ChromaDB + embedding 模型 + LlamaIndex，启动慢但运行快 | W6D4-6 |
+| 全局预加载 | `_index` 在模块加载时初始化一次，三个工具共享同一连接，Agent 多次调用不会重复加载模型 | W6D4-6 |
+| Agent 不关心工具实现 | 和 W4D7 一样——LLM 只看工具名 + description + 参数 schema，不管数据源是 dict、ChromaDB 还是 API | W6D4-6 |
+| AsyncExitStack | Streamlit 的 AgentManager 用后台线程跑 asyncio，必须用 `AsyncExitStack.enter_async_context()` 管理 MCP 上下文，不能裸调 `__aenter__()` | W6D4-6 |
+| Agent 图拓扑不变 | 和 W5D7 完全相同的 agent ↔ tools 结构，只换了工具来源和内容 | W6D4-6 |
+| 死代码清理 | 重构后要删除未使用的代码：废弃的 `llm_client`、`query_stream`、`END` 导入等，避免误导后面读代码的人 | W6D4-6 |
+
+### 踩坑记录
+
+| 坑 | 原因 | 解法 |
+|----|------|------|
+| MCP `Connection closed` | `modelscope`/`HuggingFaceEmbedding` 加载时往 stdout 打日志，MCP 客户端当 JSON-RPC 解析失败 | `sys.stdout = io.StringIO()` 在模型加载期间重定向 |
+| `__aenter__()` 导致 anyio 报错 | anyio cancel scope 必须同 task 进出，裸调 `__aenter__()` 跨 task 了 | 改用 `AsyncExitStack.enter_async_context()` |
+| `SqliteSaver.from_conn_string()` 返回 context manager | LangGraph checkpoint-sqlite 2.x API 变化 | 先用 `MemorySaver`，后续升级时适配 |
+
+### 评测结果
+
+| 维度 | 结果 |
+|------|------|
+| 工具选择正确率 | 5/5 |
+| pytest 结构+工具测试 | 7/7 PASS |
+| CLI 端到端测试 | 3/3 场景正确 |
+| 稳定性（重复 3 次）| 全部通过 |
+
+---
