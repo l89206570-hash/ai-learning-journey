@@ -4,11 +4,12 @@ tags:
   - ai-learning
   - reference
 created: 2026-05-22
-updated: 2026-06-11
+updated: 2026-06-16
 ---
 
 # AI 学习资源库
-> 自动维护，每周更新 | 最后更新: 2026-06-11
+> 手动维护，按需查阅 | 最后更新: 2026-06-16
+> 2026-06-16 重新定位：AI 作为工具+兴趣+副业，不再追踪求职市场
 
 ## 当前推荐学习（按优先级排序）
 1. [Agent Learning Hub](https://github.com/datawhalechina/Agent-Learning-Hub) — Datawhale 系统性 AI Agent 路线图 + 11 级项目阶梯，适合 W4-W10
@@ -33,8 +34,6 @@ updated: 2026-06-11
 ### 2026-06-09 扫描（本周一）
 
 **GitHub 2026 趋势确认：** Dify 143K stars 领跑全平台，Hermes Agent 150K（自学习个人 AI）、OpenHands 60.5K（自主编程 Agent）、MetaGPT 59.6K（多 Agent 模拟软件公司）、OpenCode 55K（模型无关编程 Agent）、Cline 49K（VS Code 原生 Agent）。Rust 开始进入 Agent 框架（推理速度 3.8x Python），上下文压缩层（Headroom）成为新基建。
-
-**杭州招聘验证：** 海康/钉钉/字节/淘天/招商银行全线招聘 AI Agent 开发。核心技能要求：Python（必会）、LangChain/LangGraph、RAG、Agent 框架、Prompt Engineering。加分项：Java/Go、Docker/K8s、模型微调（SFT/RLHF）、MCP 协议。实习岗 12K-18K/月。钉钉要求持有《AI应用工程师》证书——关注是否需要考。
 
 **React + AI Stack 固化：** Next.js 15 + Vercel AI SDK + Zustand 成为前端标配。"Vibe Coding"（自然语言生成完整实现）成为新默认开发范式。
 
