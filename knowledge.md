@@ -7,7 +7,7 @@ tags:
   - rag
   - streamlit
 created: 2026-05-21
-updated: 2026-06-15
+updated: 2026-06-22
 ---
 
 # 知识点存档
@@ -718,6 +718,11 @@ updated: 2026-06-15
 | ChromaDB 默认嵌入模型下载极慢 | `all-MiniLM-L6-v2` 从 AWS S3 下载 80MB，国内很慢 | 用 `SentenceTransformerEmbeddingFunction` 指向 ModelScope 缓存的中文模型 | W4D1 |
 | `OpenAI` (新) 校验模型名白名单 | LlamaIndex 0.14+ 的 `llama_index.llms.openai.OpenAI` 只认 OpenAI 官方模型名 | 用 `llama_index.llms.openai_like.OpenAILike`（需单独 `pip install llama-index-llms-openai-like`），不校验模型名 | W4D1 |
 | `load_index_from_storage()` 报找不到索引 | 只传 vector_store 不够，还需 persist_dir 指定元数据位置 | 先 `index.storage_context.persist(persist_dir=...)`，再加载时传 `StorageContext.from_defaults(vector_store=..., persist_dir=...)` | W4D1 |
+| `collection.add()` 重复 ID 报错 | 不同文件的 chunks 都用 `["0","1","2"...]` 做 ID，第二批入库时 ID 冲突抛 `UniqueConstraintError`，静默失败 | 每个 chunk 用 `{doc_type}_{index}` 做全局唯一 ID | W7D2 |
+| 中文检索全部跑偏 | `all-MiniLM-L6-v2` 训练语料以英文为主，中文语义匹配基本抓瞎 | 换 `paraphrase-multilingual-MiniLM-L12-v2`，在 50+ 语言上训练，中文语义理解来自训练数据覆盖 | W7D2 |
+| 过短片段污染检索 | 纯标题行（如 "# 设备操作指南"，<20 字符）缺乏上下文，embedding 后指向性极差 | chunk 最小长度过滤（`MIN_CHUNK_LENGTH=50`），太短的不入库 | W7D2 |
+| 入库/查询访问不同数据库 | bash `/f/` 前缀被 Python 当成相对路径 `F:\f\` 解析，和 Windows `F:\` 路径指向不同 sqlite 文件 | 用 `Path(__file__).resolve().parent` 替代 `os.path.dirname(__file__)` | W7D2 |
+| `--filter` 参数静默无结果 | metadata key 入库时叫 `doc_type`，查询时 filter 用了 `"source"`——字段名不匹配 | 统一入库和查询的 metadata key 命名 | W7D2 |
 
 ### SimpleVectorStore → ChromaDB 迁移实战（W4D2）
 
@@ -1775,3 +1780,85 @@ Streamlit UI
 | 稳定性（重复 3 次）| 全部通过 |
 
 ---
+
+## [[知识库变现]]（W7D1）
+
+### 全流程
+
+| 阶段 | 内容 |
+|------|------|
+| 搭 Bot | Dify/Coze 创建知识库 + Prompt 配置 |
+| 做案例 | 自己跑通 3-5 个典型场景，用真实数据做演示 |
+| 发内容 | 小红书/B站发搭建过程 + 效果展示，引流咨询 |
+| 接咨询 | 了解客户业务痛点，评估知识库能否解决 |
+| 谈需求 | 确认数据来源、问答范围、交付时间、价格 |
+| 交付 | Bot 链接 + 使用文档 + 简单培训 |
+| 维护 | 定期更新知识库内容，根据用户反馈优化 |
+
+### 市场价格
+
+| 级别 | 价格 | 内容 |
+|------|------|------|
+| 基础 Bot | 500-2000 | 单知识库 + 基础 Prompt |
+| 知识库+工作流 | 2000-5000 | 多文档源 + 条件逻辑 + API 调用 |
+| 企业定制 | 5000-20000 + 月费 | 完整系统 + 权限 + 数据分析 + 持续维护 |
+
+### 客户画像
+
+- 电商卖家：客服压力大，用 RAG 做智能客服
+- 小团队：内部 SOP 文档多，用知识库做新员工培训
+- 知识付费博主：粉丝群答疑量太大，用 Bot 分流
+
+### 核心壁垒
+
+- 懂业务场景 > 会用工具——能理解客户流程和痛点才是溢价来源
+- 能沟通需求 > 能写代码——客户说不清自己要什么，得帮他梳理
+
+### 平台选型
+
+| 平台 | 优点 | 缺点 |
+|------|------|------|
+| Dify Cloud | 免费额度够用，支持 DeepSeek，工作流可视化 | 企业功能需付费 |
+| Coze | 字节系，国内生态好 | 知识库上传需付费 39.9/月 |
+
+---
+
+## [[服装工厂知识库]]（W7D2）
+
+### 项目场景
+
+模拟杭州鑫盛服装厂内部知识库，为工厂员工提供生产流程、质量标准、面料、设备故障排除、订单解读、安全规范的 RAG 查询。
+
+### 项目结构
+
+```
+projects/garment-factory-kb/
+├── data/           # 6 份模拟工厂文档（Markdown）
+├── ingest.py       # 文档加载 → chunk 切分 → ChromaDB 入库
+├── query.py        # 检索 + DeepSeek LLM 回答
+└── chroma_db/      # ChromaDB 持久化目录
+```
+
+### 文档入库标准流程
+
+1. `Path(__file__).resolve().parent` 定位脚本目录（比 `os.path.dirname` 可靠，跨平台一致）
+2. `glob` 批量加载 Markdown → 提取 `doc_type`（文件名去掉 .md）
+3. 按 `##` 标题切大段 → 自然段拼合 → 超过 chunk_size 就断开
+4. 过滤空段落 + 过短片段（`MIN_CHUNK_LENGTH`）
+5. 每条 chunk 生成全局唯一 ID：`{doc_type}_{index}`
+6. `collection.add(documents, metadatas, ids)` 批量入库
+
+### 检索+RAG 查询流程
+
+1. 用户问题 → ChromaDB `query()` 向量检索 top_k 个 chunk
+2. 拼接检索结果 + 元数据 → 构造 System Prompt + User Prompt
+3. DeepSeek API 生成回答（或 `--no-llm` 只看检索结果）
+4. 支持 `--filter` 限定文档类型（metadata 过滤）
+
+### 关键踩坑（已合并到 [[ChromaDB]] 章节）
+
+- 跨文件 ID 唯一性 → `{doc_type}_{index}` 而非 `str(i)`
+- 嵌入模型选型 → multilingual 模型才支持中文
+- chunk 最小长度 → 过滤纯标题等无意义短文本
+- metadata 字段名 → 入库和查询必须一致
+- 路径解析 → `Path.resolve()` 解决 Windows/bash 路径混用
